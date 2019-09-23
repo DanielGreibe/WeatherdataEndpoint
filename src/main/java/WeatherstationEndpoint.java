@@ -9,7 +9,13 @@ public class WeatherstationEndpoint {
     @Produces(MediaType.APPLICATION_JSON)
     public String postMessage(String message)
     {
+        /*
+        //Returns the JSON message back
         return message;
+        */
+
+        //Returns a succes message
+        return "POST call success!";
     }
 
 
