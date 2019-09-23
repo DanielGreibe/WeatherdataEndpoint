@@ -4,6 +4,6 @@ import DataObjects.PayloadFields;
 
 public interface WeatherstationDAO
 {
-    boolean InsertWeatherstation(Gateway gateway, Metadata metadata, PayloadFields payloadFields, Weatherstation weatherstation);
+    boolean InsertWeatherstation(Gateway gateway, Metadata metadata, PayloadFields payloadFields, WeatherstationEndpoint weatherstation);
 
 }
