@@ -17,27 +17,25 @@ public class WeatherstationEndpoint {
 
 
     @GET
-    public String getMessage()
+    public String getAll()
     {
         //Returns all content in the database in JSON format.
-        String databaseString =  database.getAllFromDatabase();
+        String databaseString =  database.findAllFromDatabase();
         JSONObject jsonObject = new JSONObject(databaseString);
         return jsonObject.toString(4);
     }
-/*
+
     @GET
-    @Path("/{id}")
-    public String message(@PathParam("id") int id)
+    @Path("{key}")
+    public String getOne(@PathParam("key") String key)
     {
-
-        //Should return the weatherstation data with an ID of {id}
-
+        return database.findOneFromDatabase(key);
 
 
 
-        return "HAVEN'T IMPLEMENTED ACCESS TO DATABASE YET, SHOULD RETURN DATA WITH THE SPECIFIC ID " + id;
+
+        //return "HAVEN'T IMPLEMENTED ACCESS TO DATABASE YET, SHOULD RETURN DATA WITH THE SPECIFIC ID " + id;
     }
-*/
 
 
 }

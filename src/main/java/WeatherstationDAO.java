@@ -2,5 +2,7 @@ public interface WeatherstationDAO
 {
     String InsertToDatabase(String json);
 
-    String getAllFromDatabase();
+    String findAllFromDatabase();
+
+    String findOneFromDatabase(String key);
 }
