@@ -16,8 +16,7 @@ public class WeatherstationEndpoint {
     @Produces(MediaType.APPLICATION_JSON)
     public String postMessage(String message)
     {
-        database.InsertToDatabase(message);
-        return "POST call success!";
+        return database.InsertToDatabase(message);
     }
 
 
