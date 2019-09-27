@@ -1,3 +1,5 @@
+import org.json.JSONObject;
+
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 
@@ -18,7 +20,9 @@ public class WeatherstationEndpoint {
     public String getMessage()
     {
         //Returns all content in the database in JSON format.
-        return database.getAllFromDatabase();
+        String databaseString =  database.getAllFromDatabase();
+        JSONObject jsonObject = new JSONObject(databaseString);
+        return jsonObject.toString(4);
     }
 /*
     @GET
