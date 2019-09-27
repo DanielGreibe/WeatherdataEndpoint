@@ -9,7 +9,7 @@ import java.util.Arrays;
 
 @Path("weatherstation")
 public class WeatherstationEndpoint {
-    WeatherstationDAO database = new MongoDBDAO();
+    private WeatherstationDAO database = new MongoDBDAO();
 
     @POST
     @Consumes(MediaType.APPLICATION_JSON)

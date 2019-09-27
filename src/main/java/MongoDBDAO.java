@@ -10,9 +10,9 @@ public class MongoDBDAO implements WeatherstationDAO
     @Override
     public void InsertToDatabase(String jsonMessage)
     {
-        ConnectionString connectionString =
-                new ConnectionString("mongodb+srv://testuser:testuser@nitrogensensortest-c94pp.azure.mongodb.net/AgricircleDB");
-        MongoClient client = MongoClients.create(connectionString);
+        //ConnectionString connectionString =
+               // new ConnectionString("mongodb+srv://testuser:testuser@nitrogensensortest-c94pp.azure.mongodb.net/AgricircleDB");
+        //MongoClient client = MongoClients.create(connectionString);
 
         MongoClient mongoClient = DatabaseConnection.connect();
         MongoDatabase database = mongoClient.getDatabase("AgricircleDB");
