@@ -17,7 +17,6 @@ public class WeatherstationEndpoint {
     public String postMessage(String message)
     {
         database.InsertToDatabase(message);
-        //Returns a succes message
         return "POST call success!";
     }
 

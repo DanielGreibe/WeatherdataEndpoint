@@ -1,4 +1,6 @@
 public interface WeatherstationDAO
 {
-    void InsertToDatabase(String json);
+    String InsertToDatabase(String json);
+
+    String getAllFromDatabase();
 }
