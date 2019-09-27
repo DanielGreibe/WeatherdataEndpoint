@@ -9,24 +9,14 @@ import java.util.Arrays;
 
 @Path("weatherstation")
 public class WeatherstationEndpoint {
+    WeatherstationDAO database = new MongoDBDAO();
 
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public String postMessage(String message)
     {
-        /*
-        //Returns the JSON message back
-        return message;
-        */
-        MongoClient mongoClient = DatabaseConnection.connect();
-        MongoDatabase database = mongoClient.getDatabase("AgricircleDB");
-
-        MongoCollection<Document> collection = database.getCollection("Weatherstation1");
-
-        collection.insertOne(Document.parse(message));
-        mongoClient.close();
-
+        database.InsertToDatabase(message);
         //Returns a succes message
         return "POST call success!";
     }

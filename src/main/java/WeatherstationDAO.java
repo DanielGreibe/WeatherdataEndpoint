@@ -7,8 +7,5 @@ import java.util.List;
 
 public interface WeatherstationDAO
 {
-    boolean InsertWeatherstation(Gateway gateway, Metadata metadata, PayloadFields payloadFields, WeatherstationEndpoint weatherstation);
-
-    //List<Weatherstation>
-
+    void InsertToDatabase(String json);
 }
