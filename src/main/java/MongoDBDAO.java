@@ -76,7 +76,15 @@ public class MongoDBDAO implements WeatherstationDAO
         MongoCollection<Document> collection = database.getCollection("Weatherstation1");
 
         try {
-            return collection.find(eq("dev_id", key)).first().toJson();
+            Document doc =  collection.find(eq("dev_id", key)).first();
+            if(doc != null)
+            {
+                return doc.toJson();
+            }
+            else
+            {
+                return "Could not find any data with the given criterias";
+            }
         }
         catch(MongoException mwe ) {
             //  Block of code to handle errors
