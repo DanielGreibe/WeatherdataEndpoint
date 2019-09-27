@@ -1,11 +1,5 @@
-import com.mongodb.client.MongoClient;
-import com.mongodb.client.MongoCollection;
-import com.mongodb.client.MongoDatabase;
-import org.bson.Document;
-
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
-import java.util.Arrays;
 
 @Path("weatherstation")
 public class WeatherstationEndpoint {
@@ -23,18 +17,23 @@ public class WeatherstationEndpoint {
     @GET
     public String getMessage()
     {
-        /*
-        Should return all the values in the Database
-         */
-        return "HAVEN'T IMPLEMENTED ACCESS TO DATABASE YET, SHOULD RETURN ALL DATA.";
+        //Returns all content in the database in JSON format.
+        return database.getAllFromDatabase();
     }
+/*
     @GET
     @Path("/{id}")
     public String message(@PathParam("id") int id)
     {
-        /*
-        Should return the weatherstation data with an ID of {id}
-         */
+
+        //Should return the weatherstation data with an ID of {id}
+
+
+
+
         return "HAVEN'T IMPLEMENTED ACCESS TO DATABASE YET, SHOULD RETURN DATA WITH THE SPECIFIC ID " + id;
     }
+*/
+
+
 }
