@@ -1,9 +1,12 @@
-import DataObjects.Gateway;
-import DataObjects.Metadata;
-import DataObjects.PayloadFields;
-
 public interface WeatherstationDAO
 {
-    boolean InsertWeatherstation(Gateway gateway, Metadata metadata, PayloadFields payloadFields, Weatherstation weatherstation);
+    String InsertToDatabase(String json);
 
+    String findAllFromDatabase();
+
+    String findOneFromDatabase(String key);
+
+    String findSpecFieldsFromDatabase(String key);
+
+    String findSpecFieldsFromDatabaseDATE(String date);
 }
