@@ -5,4 +5,6 @@ public interface WeatherstationDAO
     String findAllFromDatabase();
 
     String findOneFromDatabase(String key);
+
+    String findSpecFieldsFromDatabase(String key);
 }

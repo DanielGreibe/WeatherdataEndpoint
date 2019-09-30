@@ -8,12 +8,11 @@ import org.bson.Document;
 import java.util.Objects;
 
 import static com.mongodb.client.model.Filters.eq;
+import static com.mongodb.client.model.Projections.include;
 
-public class MongoDBDAO implements WeatherstationDAO
-{
+public class MongoDBDAO implements WeatherstationDAO {
     @Override
-    public String InsertToDatabase(String jsonMessage)
-    {
+    public String InsertToDatabase(String jsonMessage) {
         ConnectionString connectionString =
                 new ConnectionString("mongodb+srv://testuser:testuser@nitrogensensortest-c94pp.azure.mongodb.net/AgricircleDB");
         MongoClient mongoClient = MongoClients.create(connectionString);
@@ -25,20 +24,16 @@ public class MongoDBDAO implements WeatherstationDAO
         try {
             collection.insertOne(Document.parse(jsonMessage));
             return "Database updated";
-        }
-        catch(MongoException mwe) {
+        } catch (MongoException mwe) {
             //  Block of code to handle errors
             return mwe.getMessage();
-        }
-        finally
-        {
+        } finally {
             mongoClient.close();
         }
     }
 
     @Override
-    public String findAllFromDatabase()
-    {
+    public String findAllFromDatabase() {
         ConnectionString connectionString =
                 new ConnectionString("mongodb+srv://testuser:testuser@nitrogensensortest-c94pp.azure.mongodb.net/AgricircleDB");
         MongoClient mongoClient = MongoClients.create(connectionString);
@@ -54,19 +49,16 @@ public class MongoDBDAO implements WeatherstationDAO
                 returnString = returnString + document.toJson();
             }
             return returnString;
-        }
-        catch(MongoException mwe ) {
+        } catch (MongoException mwe) {
             //  Block of code to handle errors
             return mwe.getMessage();
-        }
-        finally
-        {
+        } finally {
             mongoClient.close();
         }
     }
 
-    public String findOneFromDatabase(String key)
-    {
+    @Override
+    public String findOneFromDatabase(String key) {
         ConnectionString connectionString =
                 new ConnectionString("mongodb+srv://testuser:testuser@nitrogensensortest-c94pp.azure.mongodb.net/AgricircleDB");
         MongoClient mongoClient = MongoClients.create(connectionString);
@@ -76,22 +68,46 @@ public class MongoDBDAO implements WeatherstationDAO
         MongoCollection<Document> collection = database.getCollection("Weatherstation1");
 
         try {
-            Document doc =  collection.find(eq("dev_id", key)).first();
-            if(doc != null)
-            {
+            Document doc = collection.find(eq("dev_id", key)).first();
+            if (doc != null) {
                 return doc.toJson();
-            }
-            else
-            {
+            } else {
                 return "Could not find any data with the given criterias";
             }
-        }
-        catch(MongoException mwe ) {
+        } catch (MongoException mwe) {
             //  Block of code to handle errors
             return mwe.getMessage();
+        } finally {
+            mongoClient.close();
         }
-        finally
-        {
+    }
+
+    @Override
+    public String findSpecFieldsFromDatabase(String key) {
+        ConnectionString connectionString =
+                new ConnectionString("mongodb+srv://testuser:testuser@nitrogensensortest-c94pp.azure.mongodb.net/AgricircleDB");
+        MongoClient mongoClient = MongoClients.create(connectionString);
+
+        MongoDatabase database = mongoClient.getDatabase("AgricircleDB");
+
+        MongoCollection<Document> collection = database.getCollection("Weatherstation1");
+
+        try {
+            String returnString = "";
+            FindIterable<Document> iterable = collection.find(eq("dev_id", key))
+                    .projection(include("avg_wind_speed", "solar_radiation", "outside_temperature", "outside_humidity", "barometer_data", "rain_rate"));
+            if (iterable != null) {
+                for (Document document : iterable) {
+                    returnString = returnString + document.toJson();
+                }
+                return returnString;
+            } else {
+                return "Could not find any data with the given criterias";
+            }
+        } catch (MongoException mwe) {
+            //  Block of code to handle errors
+            return mwe.getMessage();
+        } finally {
             mongoClient.close();
         }
     }

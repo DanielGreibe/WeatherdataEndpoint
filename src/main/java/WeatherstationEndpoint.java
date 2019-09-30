@@ -1,5 +1,4 @@
 import org.json.JSONObject;
-
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 
@@ -29,13 +28,13 @@ public class WeatherstationEndpoint {
     @Path("{key}")
     public String getOne(@PathParam("key") String key)
     {
-        return database.findOneFromDatabase(key);
-
-
-
-
-        //return "HAVEN'T IMPLEMENTED ACCESS TO DATABASE YET, SHOULD RETURN DATA WITH THE SPECIFIC ID " + id;
+        return database.findSpecFieldsFromDatabase(key);
     }
 
 
+
+
+
+    //Link to implement QueryParameters
+    //https://www.mscharhag.com/java-ee-mvc/query-parameters
 }
