@@ -1,12 +1,7 @@
 import com.mongodb.ConnectionString;
 import com.mongodb.MongoException;
-import com.mongodb.MongoWriteConcernException;
-import com.mongodb.MongoWriteException;
 import com.mongodb.client.*;
 import org.bson.Document;
-
-import java.util.Objects;
-
 import static com.mongodb.client.model.Filters.eq;
 import static com.mongodb.client.model.Projections.include;
 
@@ -14,7 +9,7 @@ public class MongoDBDAO implements WeatherstationDAO {
     @Override
     public String InsertToDatabase(String jsonMessage) {
         ConnectionString connectionString =
-                new ConnectionString("mongodb+srv://testuser:testuser@nitrogensensortest-c94pp.azure.mongodb.net/AgricircleDB");
+                new ConnectionString("mongodb+srv://testuser:" + System.getenv("DTU_MONGO_PASS") + "@nitrogensensortest-c94pp.azure.mongodb.net/AgricircleDB");
         MongoClient mongoClient = MongoClients.create(connectionString);
 
         MongoDatabase database = mongoClient.getDatabase("AgricircleDB");
@@ -35,7 +30,7 @@ public class MongoDBDAO implements WeatherstationDAO {
     @Override
     public String findAllFromDatabase() {
         ConnectionString connectionString =
-                new ConnectionString("mongodb+srv://testuser:testuser@nitrogensensortest-c94pp.azure.mongodb.net/AgricircleDB");
+                new ConnectionString("mongodb+srv://testuser:" + System.getenv("DTU_MONGO_PASS") + "@nitrogensensortest-c94pp.azure.mongodb.net/AgricircleDB");
         MongoClient mongoClient = MongoClients.create(connectionString);
 
         MongoDatabase database = mongoClient.getDatabase("AgricircleDB");
@@ -60,7 +55,7 @@ public class MongoDBDAO implements WeatherstationDAO {
     @Override
     public String findOneFromDatabase(String key) {
         ConnectionString connectionString =
-                new ConnectionString("mongodb+srv://testuser:testuser@nitrogensensortest-c94pp.azure.mongodb.net/AgricircleDB");
+                new ConnectionString("mongodb+srv://testuser:" + System.getenv("DTU_MONGO_PASS") + "@nitrogensensortest-c94pp.azure.mongodb.net/AgricircleDB");
         MongoClient mongoClient = MongoClients.create(connectionString);
 
         MongoDatabase database = mongoClient.getDatabase("AgricircleDB");
@@ -85,7 +80,7 @@ public class MongoDBDAO implements WeatherstationDAO {
     @Override
     public String findSpecFieldsFromDatabase(String key) {
         ConnectionString connectionString =
-                new ConnectionString("mongodb+srv://testuser:testuser@nitrogensensortest-c94pp.azure.mongodb.net/AgricircleDB");
+                new ConnectionString("mongodb+srv://testuser:" + System.getenv("DTU_MONGO_PASS") + "@nitrogensensortest-c94pp.azure.mongodb.net/AgricircleDB");
         MongoClient mongoClient = MongoClients.create(connectionString);
 
         MongoDatabase database = mongoClient.getDatabase("AgricircleDB");
