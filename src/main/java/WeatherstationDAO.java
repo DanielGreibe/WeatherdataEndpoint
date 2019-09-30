@@ -7,4 +7,6 @@ public interface WeatherstationDAO
     String findOneFromDatabase(String key);
 
     String findSpecFieldsFromDatabase(String key);
+
+    String findSpecFieldsFromDatabaseDATE(String date);
 }

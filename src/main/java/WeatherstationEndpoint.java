@@ -1,4 +1,3 @@
-import org.json.JSONObject;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 
@@ -8,7 +7,6 @@ public class WeatherstationEndpoint {
 
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
     public String postMessage(String message)
     {
         return database.InsertToDatabase(message);
@@ -20,18 +18,15 @@ public class WeatherstationEndpoint {
     {
         //Returns all content in the database in JSON format.
         String databaseString =  database.findAllFromDatabase();
-        JSONObject jsonObject = new JSONObject(databaseString);
-        return jsonObject.toString(4);
+        return databaseString;
     }
 
     @GET
     @Path("{key}")
     public String getOne(@PathParam("key") String key)
     {
-        return database.findSpecFieldsFromDatabase(key);
+        return database.findSpecFieldsFromDatabaseDATE(key);
     }
-
-
 
 
 
