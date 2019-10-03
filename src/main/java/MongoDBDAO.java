@@ -4,9 +4,6 @@ import com.mongodb.client.*;
 import org.bson.Document;
 import org.bson.types.ObjectId;
 
-import java.util.Calendar;
-import java.util.Date;
-
 import static com.mongodb.client.model.Filters.*;
 import static com.mongodb.client.model.Projections.*;
 
@@ -19,8 +16,9 @@ public class MongoDBDAO implements WeatherstationDAO {
             collection.insertOne(Document.parse(jsonMessage));
             return "Database updated";
         } catch (MongoException mwe) {
-            //  Block of code to handle errors
+            //  Block of code to handle error
             return mwe.getMessage();
+            //throw new DBException("Soe")
         }
     }
 
@@ -92,11 +90,10 @@ public class MongoDBDAO implements WeatherstationDAO {
 
         try {
             String returnString = "";
-            Date tempDate = new Date(Calendar.DATE, 9 , 31);
-            ObjectId date = new ObjectId(tempDate);
-            System.out.println(date.toHexString());
-            System.out.println("5f75bb130000000000000000");
-            FindIterable<Document> iterable = collection.find(gte("_id" , new ObjectId("5f75bb130000000000000000")));
+         // http://steveridout.github.io/mongo-object-time/
+
+
+            FindIterable<Document> iterable = collection.find(gte("_id" , new ObjectId("5d9129600000000000000000")));
             //FindIterable<Document> iterable = collection.find(gte("_id" , date));
             if (iterable != null) {
                 for (Document document : iterable) {

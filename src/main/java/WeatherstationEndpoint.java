@@ -16,6 +16,7 @@ public class WeatherstationEndpoint {
     @GET
     public String getAll()
     {
+        System.out.println("getALL() blev kaldt");
         //Returns all content in the database in JSON format.
         String databaseString =  database.findAllFromDatabase();
         return databaseString;
