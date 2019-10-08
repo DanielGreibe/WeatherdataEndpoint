@@ -9,6 +9,7 @@ public class WeatherstationEndpoint {
     @Consumes(MediaType.APPLICATION_JSON)
     public String postMessage(String message)
     {
+        System.out.println(message);
         return database.InsertToDatabase(message);
     }
 
@@ -17,8 +18,7 @@ public class WeatherstationEndpoint {
     public String getAll()
     {
         //Returns all content in the database in JSON format.
-        String databaseString =  database.findAllFromDatabase();
-        return databaseString;
+        return database.findAllFromDatabase();
     }
 
     @GET

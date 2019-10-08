@@ -92,12 +92,11 @@ public class MongoDBDAO implements WeatherstationDAO {
 
         try {
             String returnString = "";
-            Date tempDate = new Date(Calendar.DATE, 9 , 31);
-            ObjectId date = new ObjectId(tempDate);
+            String[] splittedDate = stringDate.split("-");
+            String hexString = DateToHexString(Integer.parseInt(splittedDate[0]) , Integer.parseInt(splittedDate[1]) , Integer.parseInt(splittedDate[2]));
+            ObjectId date = new ObjectId(hexString);
             System.out.println(date.toHexString());
-            System.out.println("5f75bb130000000000000000");
-            FindIterable<Document> iterable = collection.find(gte("_id" , new ObjectId("5f75bb130000000000000000")));
-            //FindIterable<Document> iterable = collection.find(gte("_id" , date));
+            FindIterable<Document> iterable = collection.find(gte("_id" , date));
             if (iterable != null) {
                 for (Document document : iterable) {
                     returnString = returnString + document.toJson();
@@ -122,8 +121,13 @@ public class MongoDBDAO implements WeatherstationDAO {
 
         return database.getCollection(collectionName);
     }
-    private static String DateToHexConverter(String date)
+
+    public static String DateToHexString(int year, int month, int day)
     {
-        return date;
+        final Calendar calendar = Calendar.getInstance();
+        calendar.set(year, month-1, day , 0 , 0 , 0);
+        calendar.set(Calendar.MILLISECOND, 0);
+        long time = (calendar.getTimeInMillis() / 1000);
+        return Long.toHexString(time) + "0000000000000000";
     }
 }
