@@ -4,9 +4,6 @@ import com.mongodb.client.*;
 import org.bson.Document;
 import org.bson.types.ObjectId;
 
-import java.util.Calendar;
-import java.util.Date;
-
 import static com.mongodb.client.model.Filters.*;
 import static com.mongodb.client.model.Projections.*;
 
@@ -19,8 +16,9 @@ public class MongoDBDAO implements WeatherstationDAO {
             collection.insertOne(Document.parse(jsonMessage));
             return "Database updated";
         } catch (MongoException mwe) {
-            //  Block of code to handle errors
+            //  Block of code to handle error
             return mwe.getMessage();
+            //throw new DBException("Soe")
         }
     }
 
@@ -92,11 +90,13 @@ public class MongoDBDAO implements WeatherstationDAO {
 
         try {
             String returnString = "";
+
             String[] splittedDate = stringDate.split("-");
             String hexString = DateToHexString(Integer.parseInt(splittedDate[0]) , Integer.parseInt(splittedDate[1]) , Integer.parseInt(splittedDate[2]));
             ObjectId date = new ObjectId(hexString);
             System.out.println(date.toHexString());
             FindIterable<Document> iterable = collection.find(gte("_id" , date));
+
             if (iterable != null) {
                 for (Document document : iterable) {
                     returnString = returnString + document.toJson();

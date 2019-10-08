@@ -9,7 +9,8 @@ public class WeatherstationEndpoint {
     @Consumes(MediaType.APPLICATION_JSON)
     public String postMessage(String message)
     {
-        System.out.println(message);
+
+        System.out.println("Fik POST med "+message);
         return database.InsertToDatabase(message);
     }
 
@@ -17,6 +18,7 @@ public class WeatherstationEndpoint {
     @GET
     public String getAll()
     {
+        System.out.println("getALL() blev kaldt");
         //Returns all content in the database in JSON format.
         return database.findAllFromDatabase();
     }
@@ -25,6 +27,7 @@ public class WeatherstationEndpoint {
     @Path("{key}")
     public String getOne(@PathParam("key") String key)
     {
+        System.out.println("Kald getOne med "+key);
         return database.findSpecFieldsFromDatabaseDATE(key);
     }
 
