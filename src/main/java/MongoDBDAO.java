@@ -6,6 +6,7 @@ import org.bson.types.ObjectId;
 
 import java.text.DateFormatSymbols;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.InputMismatchException;
 
 import static com.mongodb.client.model.Filters.*;
@@ -114,6 +115,11 @@ public class MongoDBDAO implements WeatherstationDAO {
         calendar.set(year, month-1, day , 0 , 0 , 0);
 
         calendar.set(Calendar.MILLISECOND, 0);
+
+        if(calendar.getTime().after(new Date()))
+        {
+            throw new InputMismatchException("Date should be earlier than current date");
+        }
         long time = (calendar.getTimeInMillis() / 1000);
         return Long.toHexString(time) + "0000000000000000";
     }
@@ -122,12 +128,12 @@ public class MongoDBDAO implements WeatherstationDAO {
     {
         if(stringDate == null)
         {
-            throw new NullPointerException();
+            throw new NullPointerException("Please provide a date");
         }
         String[] splittedDate = stringDate.split("-");
         if(splittedDate.length != 3 || splittedDate[0].length() > 4 || splittedDate[1].length() > 2 || splittedDate[2].length() > 2)
         {
-            throw new InputMismatchException();
+            throw new InputMismatchException("Date format should be yyyy-mm-dd");
         }
 
         int Year = Integer.parseInt(splittedDate[0]);
