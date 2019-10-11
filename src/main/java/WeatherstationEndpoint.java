@@ -24,11 +24,11 @@ public class WeatherstationEndpoint {
     }
 
     @GET
-    @Path("{key}")
-    public String getOne(@PathParam("key") String key)
+    @Path("{date}")
+    public String getOne(@PathParam("date") String date)
     {
-        System.out.println("Kald getOne med "+key);
-        return database.findSpecFieldsFromDatabaseDATE(key);
+        System.out.println("Kald getOne med "+date);
+        return database.findSpecFieldsFromDatabaseDATE(date);
     }
 
 

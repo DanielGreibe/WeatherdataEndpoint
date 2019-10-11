@@ -5,6 +5,7 @@ import org.bson.Document;
 import org.bson.types.ObjectId;
 
 import java.util.Calendar;
+import java.util.InputMismatchException;
 
 import static com.mongodb.client.model.Filters.*;
 import static com.mongodb.client.model.Projections.*;
@@ -87,30 +88,23 @@ public class MongoDBDAO implements WeatherstationDAO {
         }
     }
 
-    public String findSpecFieldsFromDatabaseDATE(String stringDate) {
+    public String findSpecFieldsFromDatabaseDATE(String stringDate){
         MongoCollection<Document> collection = MongoConnection.getInstance("AgricircleDB").getDatabase().getCollection("Weatherstation1");
 
-        try {
-            String returnString = "";
-
-            String[] splittedDate = stringDate.split("-");
-            String hexString = DateToHexString(Integer.parseInt(splittedDate[0]) , Integer.parseInt(splittedDate[1]) , Integer.parseInt(splittedDate[2]));
-            ObjectId date = new ObjectId(hexString);
-            System.out.println(date.toHexString());
-            FindIterable<Document> iterable = collection.find(gte("_id" , date));
-
-            if (iterable != null) {
-                for (Document document : iterable) {
-                    returnString = returnString + document.toJson();
-                }
-                return returnString;
-            } else {
-                return "Could not find any data with the given criterias";
+        String returnString = "";
+        ObjectId date = DateToObjectId(stringDate);
+        FindIterable<Document> iterable = collection.find(gte("_id" , date));
+        System.out.println(iterable);
+        if (iterable != null) {
+            for (Document document : iterable) {
+                returnString = returnString + document.toJson();
             }
-        } catch (MongoException mwe) {
-            //  Block of code to handle errors
-            return mwe.getMessage();
         }
+        if(returnString.isEmpty())
+        {
+            return "We couldn't find any data with the given criteria";
+        }
+        return returnString;
     }
 
     private static String DateToHexString(int year, int month, int day)
@@ -120,5 +114,23 @@ public class MongoDBDAO implements WeatherstationDAO {
         calendar.set(Calendar.MILLISECOND, 0);
         long time = (calendar.getTimeInMillis() / 1000);
         return Long.toHexString(time) + "0000000000000000";
+    }
+
+    private ObjectId DateToObjectId(String stringDate)
+    {
+        if(stringDate == null)
+        {
+            throw new NullPointerException();
+        }
+        String[] splittedDate = stringDate.split("-");
+        if(splittedDate.length != 3)
+        {
+            throw new InputMismatchException();
+        }
+        int Year = Integer.parseInt(splittedDate[0]);
+        int Month = Integer.parseInt(splittedDate[1]);
+        int Day = Integer.parseInt(splittedDate[2]);
+        String hexString = DateToHexString(Year , Month , Day);
+        return new ObjectId(hexString);
     }
 }
