@@ -10,9 +10,10 @@ import static com.mongodb.client.model.Filters.*;
 import static com.mongodb.client.model.Projections.*;
 
 public class MongoDBDAO implements WeatherstationDAO {
+
     @Override
     public String InsertToDatabase(String jsonMessage) {
-        MongoCollection<Document> collection = Connect("AgricircleDB" , "Weatherstation1");
+        MongoCollection<Document> collection = MongoConnection.getInstance("AgricircleDB").getDatabase().getCollection("Weatherstation1");
 
         try {
             collection.insertOne(Document.parse(jsonMessage));
@@ -26,7 +27,8 @@ public class MongoDBDAO implements WeatherstationDAO {
 
     @Override
     public String findAllFromDatabase() {
-        MongoCollection<Document> collection = Connect("AgricircleDB" , "Weatherstation1");
+
+        MongoCollection<Document> collection = MongoConnection.getInstance("AgricircleDB").getDatabase().getCollection("Weatherstation1");
 
         try {
             String returnString = "";
@@ -43,7 +45,7 @@ public class MongoDBDAO implements WeatherstationDAO {
 
     @Override
     public String findOneFromDatabase(String key) {
-        MongoCollection<Document> collection = Connect("AgricircleDB" , "Weatherstation1");
+        MongoCollection<Document> collection = MongoConnection.getInstance("AgricircleDB").getDatabase().getCollection("Weatherstation1");
 
         try {
             Document doc = collection.find(eq("dev_id", key)).first();
@@ -60,19 +62,17 @@ public class MongoDBDAO implements WeatherstationDAO {
 
     @Override
     public String findSpecFieldsFromDatabase(String key) {
-                //Alternative connection to Christian Budtz Mongodb Atlas Project
-                //new ConnectionString("mongodb+srv://dtumongo:" + System.getenv("DTU_MONGO_PASS") + "@cluster0-5aegy.mongodb.net/AgricircleDB?retryWrites=true&w=majority");
-                MongoCollection<Document> collection = Connect("AgricircleDB" , "Weatherstation1");
+        MongoCollection<Document> collection = MongoConnection.getInstance("AgricircleDB").getDatabase().getCollection("Weatherstation1");
         try {
             String returnString = "";
             FindIterable<Document> iterable = collection.find(eq("dev_id", key))
                     .projection(fields(include( "payload_fields.avg_wind_speed",
-                                                            "payload_fields.solar_radiation",
-                                                            "payload_fields.outside_temperature",
-                                                            "payload_fields.outside_humidity",
-                                                            "payload_fields.barometer_data",
-                                                            "payload_fields.rain_rate"),
-                                                            excludeId()));
+                            "payload_fields.solar_radiation",
+                            "payload_fields.outside_temperature",
+                            "payload_fields.outside_humidity",
+                            "payload_fields.barometer_data",
+                            "payload_fields.rain_rate"),
+                            excludeId()));
             if (iterable != null) {
                 for (Document document : iterable) {
                     returnString = returnString + document.toJson();
@@ -88,7 +88,7 @@ public class MongoDBDAO implements WeatherstationDAO {
     }
 
     public String findSpecFieldsFromDatabaseDATE(String stringDate) {
-        MongoCollection<Document> collection = Connect("AgricircleDB" , "Weatherstation1");
+        MongoCollection<Document> collection = MongoConnection.getInstance("AgricircleDB").getDatabase().getCollection("Weatherstation1");
 
         try {
             String returnString = "";
@@ -113,18 +113,7 @@ public class MongoDBDAO implements WeatherstationDAO {
         }
     }
 
-    private static MongoCollection<Document> Connect(String databaseName, String collectionName)
-    {
-        ConnectionString connectionString =
-                new ConnectionString("mongodb+srv://testuser:" + System.getenv("DTU_MONGO_PASS_PERSONAL") + "@nitrogensensortest-c94pp.azure.mongodb.net/AgricircleDB");
-        MongoClient mongoClient = MongoClients.create(connectionString);
-
-        MongoDatabase database = mongoClient.getDatabase(databaseName);
-
-        return database.getCollection(collectionName);
-    }
-
-    public static String DateToHexString(int year, int month, int day)
+    private static String DateToHexString(int year, int month, int day)
     {
         final Calendar calendar = Calendar.getInstance();
         calendar.set(year, month-1, day , 0 , 0 , 0);
