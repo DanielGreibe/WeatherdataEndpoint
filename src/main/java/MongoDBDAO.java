@@ -4,6 +4,7 @@ import com.mongodb.client.*;
 import org.bson.Document;
 import org.bson.types.ObjectId;
 
+import java.text.DateFormatSymbols;
 import java.util.Calendar;
 import java.util.InputMismatchException;
 
@@ -32,12 +33,12 @@ public class MongoDBDAO implements WeatherstationDAO {
         MongoCollection<Document> collection = MongoConnection.getInstance("AgricircleDB").getDatabase().getCollection("Weatherstation1");
 
         try {
-            String returnString = "";
+            StringBuilder returnString = new StringBuilder();
             FindIterable<Document> iterable = collection.find();
             for (Document document : iterable) {
-                returnString = returnString + document.toJson();
+                returnString.append(document.toJson());
             }
-            return returnString;
+            return returnString.toString();
         } catch (MongoException mwe) {
             //  Block of code to handle errors
             return mwe.getMessage();
@@ -65,7 +66,7 @@ public class MongoDBDAO implements WeatherstationDAO {
     public String findSpecFieldsFromDatabase(String key) {
         MongoCollection<Document> collection = MongoConnection.getInstance("AgricircleDB").getDatabase().getCollection("Weatherstation1");
         try {
-            String returnString = "";
+            StringBuilder returnString = new StringBuilder();
             FindIterable<Document> iterable = collection.find(eq("dev_id", key))
                     .projection(fields(include( "payload_fields.avg_wind_speed",
                             "payload_fields.solar_radiation",
@@ -76,9 +77,9 @@ public class MongoDBDAO implements WeatherstationDAO {
                             excludeId()));
             if (iterable != null) {
                 for (Document document : iterable) {
-                    returnString = returnString + document.toJson();
+                    returnString.append(document.toJson());
                 }
-                return returnString;
+                return returnString.toString();
             } else {
                 return "Could not find any data with the given criterias";
             }
@@ -91,26 +92,27 @@ public class MongoDBDAO implements WeatherstationDAO {
     public String findSpecFieldsFromDatabaseDATE(String stringDate){
         MongoCollection<Document> collection = MongoConnection.getInstance("AgricircleDB").getDatabase().getCollection("Weatherstation1");
 
-        String returnString = "";
+        StringBuilder returnString = new StringBuilder();
         ObjectId date = DateToObjectId(stringDate);
         FindIterable<Document> iterable = collection.find(gte("_id" , date));
         System.out.println(iterable);
         if (iterable != null) {
             for (Document document : iterable) {
-                returnString = returnString + document.toJson();
+                returnString.append(document.toJson());
             }
         }
-        if(returnString.isEmpty())
+        if(returnString.length() == 0)
         {
             return "We couldn't find any data with the given criteria";
         }
-        return returnString;
+        return returnString.toString();
     }
 
     private static String DateToHexString(int year, int month, int day)
     {
         final Calendar calendar = Calendar.getInstance();
         calendar.set(year, month-1, day , 0 , 0 , 0);
+
         calendar.set(Calendar.MILLISECOND, 0);
         long time = (calendar.getTimeInMillis() / 1000);
         return Long.toHexString(time) + "0000000000000000";
@@ -123,10 +125,11 @@ public class MongoDBDAO implements WeatherstationDAO {
             throw new NullPointerException();
         }
         String[] splittedDate = stringDate.split("-");
-        if(splittedDate.length != 3)
+        if(splittedDate.length != 3 || splittedDate[0].length() > 4 || splittedDate[1].length() > 2 || splittedDate[2].length() > 2)
         {
             throw new InputMismatchException();
         }
+
         int Year = Integer.parseInt(splittedDate[0]);
         int Month = Integer.parseInt(splittedDate[1]);
         int Day = Integer.parseInt(splittedDate[2]);
