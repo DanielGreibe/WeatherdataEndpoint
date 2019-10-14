@@ -2,12 +2,10 @@ import com.mongodb.*;
 import com.mongodb.client.*;
 import org.bson.Document;
 import org.bson.types.ObjectId;
-
 import java.rmi.ServerException;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.InputMismatchException;
-
 import static com.mongodb.client.model.Filters.*;
 import static com.mongodb.client.model.Projections.*;
 
@@ -40,9 +38,12 @@ public class MongoDBDAO implements WeatherstationDAO {
                 "payload_fields.rain_rate"),
                 excludeId()));
         if(iterable != null) {
+            returnString.append("[");
             for (Document document : iterable) {
-                returnString.append(document.toJson());
+                returnString.append(document.toJson()).append(",");
             }
+            returnString.delete(returnString.length()-1 , returnString.length());
+            returnString.append("]");
         }
         if(returnString.length() == 0)
         {
