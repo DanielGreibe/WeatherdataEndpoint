@@ -32,31 +32,39 @@ public class WeatherstationEndpoint {
 
     }
 
-
     /**
      * Provides all data stored in the database from the weather station stated in the weatherstationName parameter.
      * @param weatherstationName the name of the weather station to get data from.
+     * @param contentType the type of content the API produces. Can be netcdf or json. Default is json.
      * @return a JSON string with all data in the database.
      */
     @GET
-    public String getWeatherstationData(@PathParam("weatherstation") String weatherstationName)
+    public String getWeatherstationData(@PathParam("weatherstation") String weatherstationName , @QueryParam("contenttype") String contentType)
     {
-        System.out.println("Kald getWeatherstationData(weatherstationName) med " + weatherstationName);
+        System.out.println(
+                "Kald getWeatherstationData(date,weatherstationName, contentType): \n" +
+                        "Weatherstation Name: " + weatherstationName + "\n" +
+                        "ContentType: " + contentType);
         //Returns all content in the database in JSON format.
-        return database.getWeatherstationData(weatherstationName);
+        return database.getWeatherstationData(weatherstationName , contentType);
     }
 
     /**
      * Provides all data elements that was posted between the provided date and current day.
      * @param date A yyyy-mm-dd formatted string.
      * @param weatherstationName the name of the weather station to get data from.
+     * @param contentType the type of content the API produces. Can be netcdf or json. Default is json.
      * @return A list of JSON elements that matches the filter criteria provided or 'We couldn't find any data with the given criteria' if no such data exists.
      */
     @GET
     @Path("{date}")
-    public String getWeatherstationData(@PathParam("date") String date , @PathParam("weatherstation") String weatherstationName)
+    public String getWeatherstationData(@PathParam("date") String date , @PathParam("weatherstation") String weatherstationName , @QueryParam("contenttype") String contentType)
     {
-        System.out.println("Kald getWeatherstationData(date,weatherstationName) med " + date + " og " + weatherstationName);
-        return database.getWeatherstationData(date , weatherstationName);
+        System.out.println(
+                "Kald getWeatherstationData(date,weatherstationName, contentType): " +
+                "\n Date: " + date +
+                "\n Weatherstation Name: " + weatherstationName +
+                "\n ContentType: " + contentType);
+        return database.getWeatherstationData(date , weatherstationName , contentType);
     }
 }

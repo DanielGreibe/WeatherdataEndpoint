@@ -83,6 +83,15 @@
             <version>RELEASE</version>
             <scope>compile</scope>
         </dependency>
+        <!-- https://mvnrepository.com/artifact/edu.ucar/netcdf -->
+        <dependency>
+            <groupId>edu.ucar</groupId>
+            <artifactId>netcdf</artifactId>
+            <version>4.2.20</version>
+        </dependency>
+
+
+
 
 
     </dependencies>

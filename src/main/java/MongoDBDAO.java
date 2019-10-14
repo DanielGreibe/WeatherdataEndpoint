@@ -24,7 +24,7 @@ public class MongoDBDAO implements WeatherstationDAO {
     }
 
     @Override
-    public String getWeatherstationData(String weatherstationName)
+    public String getWeatherstationData(String weatherstationName , String contentType)
     {
         MongoCollection<Document> collection = MongoConnection.getInstance("AgricircleDB").getDatabase().getCollection(weatherstationName);
         StringBuilder returnString = new StringBuilder();
@@ -36,6 +36,11 @@ public class MongoDBDAO implements WeatherstationDAO {
                 "payload_fields.barometer_data",
                 "payload_fields.rain_rate"),
                 excludeId()));
+        if(contentType.equals("netcdf"))
+        {
+            //TODO Convert JSON to netcdf and return it.
+            return "Not Yet Implemented. Use contenttype = json";
+        }
         if(iterable != null) {
             returnString.append("[");
             for (Document document : iterable) {
@@ -53,7 +58,7 @@ public class MongoDBDAO implements WeatherstationDAO {
 
 
 
-    public String getWeatherstationData(String stringDate , String weatherstationName){
+    public String getWeatherstationData(String stringDate , String weatherstationName , String contentType){
         MongoCollection<Document> collection = MongoConnection.getInstance("AgricircleDB").getDatabase().getCollection(weatherstationName);
 
         StringBuilder returnString = new StringBuilder();
@@ -75,17 +80,22 @@ public class MongoDBDAO implements WeatherstationDAO {
                         "payload_fields.barometer_data",
                         "payload_fields.rain_rate"),
                         excludeId()));
-        if (iterable != null) {
-            returnString.append("{\"dataobjects\":[");
-            for (Document document : iterable) {
-                returnString.append(document.toJson()).append(",");
-            }
-            returnString.delete(returnString.length()-1 , returnString.length());
-            returnString.append("]}");
-        }
-        if(returnString.length() == 0)
+
+        if(contentType!= null && contentType.equals("netcdf"))
         {
-            returnString.append("We couldn't find any data with the given criteria");
+            //TODO Convert JSON to netcdf and return it.
+            return "Not Yet Implemented. Use contenttype = json";
+        }
+        else
+        {
+            if (iterable != null) {
+                returnString.append("{\"dataobjects\":[");
+                for (Document document : iterable) {
+                    returnString.append(document.toJson()).append(",");
+                }
+                returnString.delete(returnString.length() - 1, returnString.length());
+                returnString.append("]}");
+            }
         }
         return returnString.toString();
     }
@@ -129,5 +139,4 @@ public class MongoDBDAO implements WeatherstationDAO {
             super(message);
         }
     }
-
 }
