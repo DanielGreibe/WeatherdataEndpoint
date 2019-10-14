@@ -4,16 +4,17 @@ import java.rmi.ServerException;
 
 /**
  * Provides an endpoint for weather data from multiple weather-stations located at various locations.
+ * Possible input formats and outputs formats are described in the corresponding methods documentation.
  */
 @Path("{weatherstation}")
 public class WeatherstationEndpoint {
     private WeatherstationDAO database = new MongoDBDAO();
 
     /**
-     * Inserts a JSON data provided in the message to the database in the collection / table with the provided weather stationName.
-     * @param message contains the JSON element to be inserted in the database.
-     * @param weatherstationName the name of the weather station that provided the data.
-     * @return returns 'Database updated' if the procedure succeeded.
+     * Inserts a text/JSON formatted String provided in the 'message' parameter to the database in the collection / table with the name provided in the 'weatherstationName' parameter.
+     * @param message contains the text/JSON formatted String to be inserted in the database.
+     * @param weatherstationName the name of the weatherstation that provided the data.
+     * @return returns 'Database updated' if the procedure succeeded or the error message.
      */
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
