@@ -7,6 +7,7 @@ import java.rmi.ServerException;
  * Possible input formats and outputs formats are described in the corresponding methods documentation.
  */
 @Path("{weatherstation}")
+
 public class WeatherstationEndpoint {
     private WeatherstationDAO database = new MongoDBDAO();
 
