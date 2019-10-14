@@ -9,6 +9,8 @@ import java.util.Date;
 import java.util.InputMismatchException;
 
 import static com.mongodb.client.model.Filters.*;
+import static com.mongodb.client.model.Projections.*;
+
 public class MongoDBDAO implements WeatherstationDAO {
 
 
@@ -29,7 +31,14 @@ public class MongoDBDAO implements WeatherstationDAO {
     {
         MongoCollection<Document> collection = MongoConnection.getInstance("AgricircleDB").getDatabase().getCollection(weatherstationName);
         StringBuilder returnString = new StringBuilder();
-        FindIterable<Document> iterable = collection.find();
+        FindIterable<Document> iterable = collection.find().projection(fields(include(
+                "payload_fields.avg_wind_speed",
+                "payload_fields.solar_radiation",
+                "payload_fields.outside_temperature",
+                "payload_fields.outside_humidity",
+                "payload_fields.barometer_data",
+                "payload_fields.rain_rate"),
+                excludeId()));
         if(iterable != null) {
             for (Document document : iterable) {
                 returnString.append(document.toJson());
@@ -49,11 +58,23 @@ public class MongoDBDAO implements WeatherstationDAO {
 
         StringBuilder returnString = new StringBuilder();
         ObjectId date = DateToObjectId(stringDate);
-        FindIterable<Document> iterable = collection.find(gte("_id" , date));
+        FindIterable<Document> iterable = collection.find(gte("_id" , date)).
+                projection(fields(include(
+                        "payload_fields.avg_wind_speed",
+                        "payload_fields.solar_radiation",
+                        "payload_fields.outside_temperature",
+                        "payload_fields.outside_humidity",
+                        "payload_fields.barometer_data",
+                        "payload_fields.rain_rate"),
+                        excludeId()));
         if (iterable != null) {
+            returnString.append("{\"dataobjects\":[");
             for (Document document : iterable) {
-                returnString.append(document.toJson());
+                System.out.println(returnString);
+                returnString.append(document.toJson()).append(",");
             }
+            returnString.delete(returnString.length()-1 , returnString.length());
+            returnString.append("]}");
         }
         if(returnString.length() == 0)
         {
