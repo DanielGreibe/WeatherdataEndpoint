@@ -1,10 +1,18 @@
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 
+/**
+ * Provides an endpoint for weather data from multiple weather-stations located at various locations.
+ */
 @Path("weatherstation")
 public class WeatherstationEndpoint {
     private WeatherstationDAO database = new MongoDBDAO();
 
+    /**
+     * Inserts a JSON element into the database.
+     * @param message contains the JSON element to be inserted in the database.
+     * @return returns 'Database updated' if the procedure succeeded.
+     */
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     public String postMessage(String message)
@@ -15,6 +23,10 @@ public class WeatherstationEndpoint {
     }
 
 
+    /**
+     * Provides all data stored in the database.
+     * @return a JSON string with all data in the database.
+     */
     @GET
     public String getAll()
     {
@@ -23,6 +35,11 @@ public class WeatherstationEndpoint {
         return database.findAllFromDatabase();
     }
 
+    /**
+     * Provides all data elements that was posted between the provided date and current day.
+     * @param date A yyyy-mm-dd formatted string.
+     * @return A list of JSON elements that matches the filter criteria provided or 'We couldn't find any data with the given criteria' if no such data exists.
+     */
     @GET
     @Path("{date}")
     public String getOne(@PathParam("date") String date)
@@ -30,9 +47,4 @@ public class WeatherstationEndpoint {
         System.out.println("Kald getOne med "+date);
         return database.findSpecFieldsFromDatabaseDATE(date);
     }
-
-
-
-    //Link to implement QueryParameters
-    //https://www.mscharhag.com/java-ee-mvc/query-parameters
 }

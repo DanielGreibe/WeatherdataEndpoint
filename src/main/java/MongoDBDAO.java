@@ -1,10 +1,7 @@
-import com.mongodb.ConnectionString;
 import com.mongodb.MongoException;
 import com.mongodb.client.*;
 import org.bson.Document;
 import org.bson.types.ObjectId;
-
-import java.text.DateFormatSymbols;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.InputMismatchException;
@@ -14,9 +11,12 @@ import static com.mongodb.client.model.Projections.*;
 
 public class MongoDBDAO implements WeatherstationDAO {
 
+
+
     @Override
     public String InsertToDatabase(String jsonMessage) {
         MongoCollection<Document> collection = MongoConnection.getInstance("AgricircleDB").getDatabase().getCollection("Weatherstation1");
+
 
         try {
             collection.insertOne(Document.parse(jsonMessage));
