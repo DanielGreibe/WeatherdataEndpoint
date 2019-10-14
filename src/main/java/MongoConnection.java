@@ -8,7 +8,7 @@ import com.mongodb.client.MongoDatabase;
  * */
 public class MongoConnection
 {
-    private static boolean TestEnvironment = true;
+    private static boolean TestEnvironment = false;
     private static MongoConnection mongoTestConnection = null;
     private static MongoConnection mongoProductionConnection = null;
 
