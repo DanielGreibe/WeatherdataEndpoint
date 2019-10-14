@@ -14,7 +14,11 @@ public class MongoDBDAO implements WeatherstationDAO {
 
     @Override
     public String setWeatherstationData(String jsonMessage, String weatherstationName) throws ServerException {
-        MongoCollection<Document> collection = MongoConnection.getInstance("AgricircleDB").getDatabase().getCollection(weatherstationName);
+        //For Production:
+        //MongoCollection<Document> collection = MongoConnection.getInstance("AgricircleDB").getDatabase().getCollection(weatherstationName);
+
+        //For Development:
+        MongoCollection<Document> collection = MongoConnection.getInstance("AgricircleDB").getDatabase().getCollection("Weatherstation1");
         try {
             collection.insertOne(Document.parse(jsonMessage));
             return "Database updated";
@@ -26,7 +30,11 @@ public class MongoDBDAO implements WeatherstationDAO {
     @Override
     public String getWeatherstationData(String weatherstationName , String contentType)
     {
-        MongoCollection<Document> collection = MongoConnection.getInstance("AgricircleDB").getDatabase().getCollection(weatherstationName);
+        //For Production:
+        //MongoCollection<Document> collection = MongoConnection.getInstance("AgricircleDB").getDatabase().getCollection(weatherstationName);
+
+        //For Development:
+        MongoCollection<Document> collection = MongoConnection.getInstance("AgricircleDB").getDatabase().getCollection("Weatherstation1");
         StringBuilder returnString = new StringBuilder();
         FindIterable<Document> iterable = collection.find().projection(fields(include(
                 "payload_fields.avg_wind_speed",
@@ -59,7 +67,11 @@ public class MongoDBDAO implements WeatherstationDAO {
 
 
     public String getWeatherstationData(String stringDate , String weatherstationName , String contentType){
-        MongoCollection<Document> collection = MongoConnection.getInstance("AgricircleDB").getDatabase().getCollection(weatherstationName);
+        //For Production:
+        //MongoCollection<Document> collection = MongoConnection.getInstance("AgricircleDB").getDatabase().getCollection(weatherstationName);
+
+        //For Development:
+        MongoCollection<Document> collection = MongoConnection.getInstance("AgricircleDB").getDatabase().getCollection("Weatherstation1");
 
         StringBuilder returnString = new StringBuilder();
         ObjectId date;
