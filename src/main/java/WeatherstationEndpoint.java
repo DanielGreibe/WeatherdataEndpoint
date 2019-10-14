@@ -14,7 +14,7 @@ public class WeatherstationEndpoint {
     /**
      * Inserts a text/JSON formatted String provided in the 'message' parameter to the database in the collection / table with the name provided in the 'weatherstationName' parameter.
      * @param message contains the text/JSON formatted String to be inserted in the database.
-     * @param weatherstationName the name of the weatherstation that provided the data.
+     * @param weatherstationName the name of the weatherstation that provided the data (Not Yet Implemented!)
      * @return returns 'Database updated' if the procedure succeeded or the error message.
      */
     @POST
@@ -35,8 +35,8 @@ public class WeatherstationEndpoint {
 
     /**
      * Provides all data stored in the database from the weather station stated in the weatherstationName parameter.
-     * @param weatherstationName the name of the weather station to get data from.
-     * @param contentType the type of content the API produces. Can be netcdf or json. Default is json.
+     * @param weatherstationName the name of the weather station to get data from. (Not Yet Implemented!)
+     * @param contentType the type of content the API produces. Can be netcdf or json. Only json is possible atm.
      * @return a JSON string with all data in the database.
      */
     @GET
@@ -53,8 +53,8 @@ public class WeatherstationEndpoint {
     /**
      * Provides all data elements that was posted between the provided date and current day.
      * @param date A yyyy-mm-dd formatted string.
-     * @param weatherstationName the name of the weather station to get data from.
-     * @param contentType the type of content the API produces. Can be netcdf or json. Default is json.
+     * @param weatherstationName the name of the weather station to get data from. (Not Yet Implemented!)
+     * @param contentType the type of content the API produces. Can be netcdf or json. Only json is possible atm.
      * @return A list of JSON elements that matches the filter criteria provided or 'We couldn't find any data with the given criteria' if no such data exists.
      */
     @GET
