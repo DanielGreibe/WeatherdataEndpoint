@@ -4,7 +4,7 @@ import javax.ws.rs.core.MediaType;
 /**
  * Provides an endpoint for weather data from multiple weather-stations located at various locations.
  */
-@Path("weatherstation")
+@Path("{weatherstation}")
 public class WeatherstationEndpoint {
     private WeatherstationDAO database = new MongoDBDAO();
 
@@ -15,11 +15,10 @@ public class WeatherstationEndpoint {
      */
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
-    public String postMessage(String message)
+    public String postMessage(String message, @PathParam("weatherstation") String weatherstationName)
     {
-
         System.out.println("Fik POST med "+message);
-        return database.InsertToDatabase(message);
+        return database.InsertToDatabase(message , weatherstationName);
     }
 
 
@@ -28,11 +27,11 @@ public class WeatherstationEndpoint {
      * @return a JSON string with all data in the database.
      */
     @GET
-    public String getAll()
+    public String getAll(@PathParam("weatherstation") String weatherstationName)
     {
         System.out.println("getALL() blev kaldt");
         //Returns all content in the database in JSON format.
-        return database.findAllFromDatabase();
+        return database.findAllFromDatabase(weatherstationName);
     }
 
     /**
@@ -42,9 +41,9 @@ public class WeatherstationEndpoint {
      */
     @GET
     @Path("{date}")
-    public String getOne(@PathParam("date") String date)
+    public String getOne(@PathParam("date") String date , @PathParam("weatherstation") String weatherstationName)
     {
         System.out.println("Kald getOne med "+date);
-        return database.findSpecFieldsFromDatabaseDATE(date);
+        return database.getWeatherstationData(date , weatherstationName);
     }
 }

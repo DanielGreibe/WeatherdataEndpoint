@@ -14,8 +14,8 @@ public class MongoDBDAO implements WeatherstationDAO {
 
 
     @Override
-    public String InsertToDatabase(String jsonMessage) {
-        MongoCollection<Document> collection = MongoConnection.getInstance("AgricircleDB").getDatabase().getCollection("Weatherstation1");
+    public String InsertToDatabase(String jsonMessage, String weatherstationName) {
+        MongoCollection<Document> collection = MongoConnection.getInstance("AgricircleDB").getDatabase().getCollection(weatherstationName);
 
 
         try {
@@ -29,9 +29,9 @@ public class MongoDBDAO implements WeatherstationDAO {
     }
 
     @Override
-    public String findAllFromDatabase() {
+    public String findAllFromDatabase(String weatherstationName) {
 
-        MongoCollection<Document> collection = MongoConnection.getInstance("AgricircleDB").getDatabase().getCollection("Weatherstation1");
+        MongoCollection<Document> collection = MongoConnection.getInstance("AgricircleDB").getDatabase().getCollection(weatherstationName);
 
         try {
             StringBuilder returnString = new StringBuilder();
@@ -90,8 +90,8 @@ public class MongoDBDAO implements WeatherstationDAO {
         }
     }
 
-    public String findSpecFieldsFromDatabaseDATE(String stringDate){
-        MongoCollection<Document> collection = MongoConnection.getInstance("AgricircleDB").getDatabase().getCollection("Weatherstation1");
+    public String getWeatherstationData(String stringDate , String weatherstationName){
+        MongoCollection<Document> collection = MongoConnection.getInstance("AgricircleDB").getDatabase().getCollection(weatherstationName);
 
         StringBuilder returnString = new StringBuilder();
         ObjectId date = DateToObjectId(stringDate);
