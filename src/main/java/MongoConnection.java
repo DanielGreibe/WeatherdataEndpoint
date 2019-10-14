@@ -3,17 +3,35 @@ import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoDatabase;
 
+/**
+ * jdoc description
+ * */
 public class MongoConnection
 {
-    private static MongoConnection mongoConnection = null;
+    private static boolean TestEnvironment = true;
+    private static MongoConnection mongoTestConnection = null;
+    private static MongoConnection mongoProductionConnection = null;
 
     public static MongoConnection getInstance(String database)
     {
-        if (mongoConnection == null)
+        if(TestEnvironment)
         {
-            mongoConnection = new MongoConnection(database);
+            if (mongoTestConnection == null)
+            {
+                mongoTestConnection = new MongoConnection("test");
+
+            }
+            return mongoTestConnection;
         }
-        return mongoConnection;
+        else
+        {
+            if (mongoProductionConnection == null)
+            {
+                mongoProductionConnection = new MongoConnection(database);
+
+            }
+            return mongoProductionConnection;
+        }
     }
 
     private MongoClient mongoClient = null;
@@ -21,9 +39,15 @@ public class MongoConnection
 
     private MongoConnection(String database)
     {
-        //Alternative connection to Christian Budtz Mongodb Atlas Project
-        //new ConnectionString("mongodb+srv://dtumongo:" + System.getenv("DTU_MONGO_PASS") + "@cluster0-5aegy.mongodb.net/AgricircleDB?retryWrites=true&w=majority");
-        ConnectionString connectionString = new ConnectionString("mongodb+srv://testuser:" + System.getenv("DTU_MONGO_PASS_PERSONAL") + "@nitrogensensortest-c94pp.azure.mongodb.net/" + database);
+        ConnectionString connectionString;
+        if(TestEnvironment)
+        {
+            connectionString = new ConnectionString("mongodb+srv://testuser:" + System.getenv("DTU_MONGO_PASS_PERSONAL") + "@nitrogensensortest-c94pp.azure.mongodb.net/test");
+        }
+        else
+        {
+            connectionString = new ConnectionString("mongodb+srv://testuser:" + System.getenv("DTU_MONGO_PASS_PERSONAL") + "@nitrogensensortest-c94pp.azure.mongodb.net/" + database);
+        }
         mongoClient = MongoClients.create(connectionString);
         mongoDatabase = mongoClient.getDatabase(database);
     }

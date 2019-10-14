@@ -1,116 +1,118 @@
-import com.mongodb.ConnectionString;
-import com.mongodb.MongoException;
+import com.mongodb.*;
 import com.mongodb.client.*;
 import org.bson.Document;
 import org.bson.types.ObjectId;
-
-import java.text.DateFormatSymbols;
+import java.rmi.ServerException;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.InputMismatchException;
-
 import static com.mongodb.client.model.Filters.*;
 import static com.mongodb.client.model.Projections.*;
 
 public class MongoDBDAO implements WeatherstationDAO {
 
-    @Override
-    public String InsertToDatabase(String jsonMessage) {
-        MongoCollection<Document> collection = MongoConnection.getInstance("AgricircleDB").getDatabase().getCollection("Weatherstation1");
 
+
+    @Override
+    public String setWeatherstationData(String jsonMessage, String weatherstationName) throws ServerException {
+        //For Production:
+        //MongoCollection<Document> collection = MongoConnection.getInstance("AgricircleDB").getDatabase().getCollection(weatherstationName);
+
+        //For Development:
+        MongoCollection<Document> collection = MongoConnection.getInstance("AgricircleDB").getDatabase().getCollection("Weatherstation1");
         try {
             collection.insertOne(Document.parse(jsonMessage));
             return "Database updated";
-        } catch (MongoException mwe) {
-            //  Block of code to handle error
-            return mwe.getMessage();
-            //throw new DBException("Soe")
+        } catch (MongoWriteException | MongoWriteConcernException e) {
+            throw new ServerException(e.getMessage());
         }
     }
 
     @Override
-    public String findAllFromDatabase() {
+    public String getWeatherstationData(String weatherstationName , String contentType)
+    {
+        //For Production:
+        //MongoCollection<Document> collection = MongoConnection.getInstance("AgricircleDB").getDatabase().getCollection(weatherstationName);
 
+        //For Development:
         MongoCollection<Document> collection = MongoConnection.getInstance("AgricircleDB").getDatabase().getCollection("Weatherstation1");
-
-        try {
-            StringBuilder returnString = new StringBuilder();
-            FindIterable<Document> iterable = collection.find();
-            for (Document document : iterable) {
-                returnString.append(document.toJson());
-            }
-            return returnString.toString();
-        } catch (MongoException mwe) {
-            //  Block of code to handle errors
-            return mwe.getMessage();
-        }
-    }
-
-    @Override
-    public String findOneFromDatabase(String key) {
-        MongoCollection<Document> collection = MongoConnection.getInstance("AgricircleDB").getDatabase().getCollection("Weatherstation1");
-
-        try {
-            Document doc = collection.find(eq("dev_id", key)).first();
-            if (doc != null) {
-                return doc.toJson();
-            } else {
-                return "Could not find any data with the given criterias";
-            }
-        } catch (MongoException mwe) {
-            //  Block of code to handle errors
-            return mwe.getMessage();
-        }
-    }
-
-    @Override
-    public String findSpecFieldsFromDatabase(String key) {
-        MongoCollection<Document> collection = MongoConnection.getInstance("AgricircleDB").getDatabase().getCollection("Weatherstation1");
-        try {
-            StringBuilder returnString = new StringBuilder();
-            FindIterable<Document> iterable = collection.find(eq("dev_id", key))
-                    .projection(fields(include( "payload_fields.avg_wind_speed",
-                            "payload_fields.solar_radiation",
-                            "payload_fields.outside_temperature",
-                            "payload_fields.outside_humidity",
-                            "payload_fields.barometer_data",
-                            "payload_fields.rain_rate"),
-                            excludeId()));
-            if (iterable != null) {
-                for (Document document : iterable) {
-                    returnString.append(document.toJson());
-                }
-                return returnString.toString();
-            } else {
-                return "Could not find any data with the given criterias";
-            }
-        } catch (MongoException mwe) {
-            //  Block of code to handle errors
-            return mwe.getMessage();
-        }
-    }
-
-    public String findSpecFieldsFromDatabaseDATE(String stringDate){
-        MongoCollection<Document> collection = MongoConnection.getInstance("AgricircleDB").getDatabase().getCollection("Weatherstation1");
-
         StringBuilder returnString = new StringBuilder();
-        ObjectId date = DateToObjectId(stringDate);
-        FindIterable<Document> iterable = collection.find(gte("_id" , date));
-        System.out.println(iterable);
-        if (iterable != null) {
+        FindIterable<Document> iterable = collection.find().projection(fields(include(
+                "payload_fields.avg_wind_speed",
+                "payload_fields.solar_radiation",
+                "payload_fields.outside_temperature",
+                "payload_fields.outside_humidity",
+                "payload_fields.barometer_data",
+                "payload_fields.rain_rate"),
+                excludeId()));
+        if(contentType.equals("netcdf"))
+        {
+            //TODO Convert JSON to netcdf and return it.
+            return "Not Yet Implemented. Use contenttype = json";
+        }
+        if(iterable != null) {
+            returnString.append("[");
             for (Document document : iterable) {
-                returnString.append(document.toJson());
+                returnString.append(document.toJson()).append(",");
             }
+            returnString.delete(returnString.length()-1 , returnString.length());
+            returnString.append("]");
         }
         if(returnString.length() == 0)
         {
-            return "We couldn't find any data with the given criteria";
+            returnString.append("We couldn't find any data with the given criteria");
         }
         return returnString.toString();
     }
 
-    private static String DateToHexString(int year, int month, int day)
-    {
+
+
+    public String getWeatherstationData(String stringDate , String weatherstationName , String contentType){
+        //For Production:
+        //MongoCollection<Document> collection = MongoConnection.getInstance("AgricircleDB").getDatabase().getCollection(weatherstationName);
+
+        //For Development:
+        MongoCollection<Document> collection = MongoConnection.getInstance("AgricircleDB").getDatabase().getCollection("Weatherstation1");
+
+        StringBuilder returnString = new StringBuilder();
+        ObjectId date;
+        try{
+             date = DateToObjectId(stringDate);
+        }
+        catch(WrongDateFormatException wdfe)
+        {
+            return wdfe.getMessage();
+        }
+
+        FindIterable<Document> iterable = collection.find(gte("_id" , date)).
+                projection(fields(include(
+                        "payload_fields.avg_wind_speed",
+                        "payload_fields.solar_radiation",
+                        "payload_fields.outside_temperature",
+                        "payload_fields.outside_humidity",
+                        "payload_fields.barometer_data",
+                        "payload_fields.rain_rate"),
+                        excludeId()));
+
+        if(contentType!= null && contentType.equals("netcdf"))
+        {
+            //TODO Convert JSON to netcdf and return it.
+            return "Not Yet Implemented. Use contenttype = json";
+        }
+        else
+        {
+            if (iterable != null) {
+                returnString.append("{\"dataobjects\":[");
+                for (Document document : iterable) {
+                    returnString.append(document.toJson()).append(",");
+                }
+                returnString.delete(returnString.length() - 1, returnString.length());
+                returnString.append("]}");
+            }
+        }
+        return returnString.toString();
+    }
+
+    private static String DateToHexString(int year, int month, int day) throws WrongDateFormatException {
         final Calendar calendar = Calendar.getInstance();
         calendar.set(year, month-1, day , 0 , 0 , 0);
 
@@ -118,22 +120,21 @@ public class MongoDBDAO implements WeatherstationDAO {
 
         if(calendar.getTime().after(new Date()))
         {
-            throw new InputMismatchException("Date should be earlier than current date");
+            throw new WrongDateFormatException("Date should be earlier than current date");
         }
         long time = (calendar.getTimeInMillis() / 1000);
         return Long.toHexString(time) + "0000000000000000";
     }
 
-    private ObjectId DateToObjectId(String stringDate)
-    {
+    private static ObjectId DateToObjectId(String stringDate) throws WrongDateFormatException {
         if(stringDate == null)
         {
-            throw new NullPointerException("Please provide a date");
+            throw new WrongDateFormatException("Please provide a date");
         }
         String[] splittedDate = stringDate.split("-");
         if(splittedDate.length != 3 || splittedDate[0].length() > 4 || splittedDate[1].length() > 2 || splittedDate[2].length() > 2)
         {
-            throw new InputMismatchException("Date format should be yyyy-mm-dd");
+            throw new WrongDateFormatException("Date format should be yyyy-mm-dd");
         }
 
         int Year = Integer.parseInt(splittedDate[0]);
@@ -141,5 +142,13 @@ public class MongoDBDAO implements WeatherstationDAO {
         int Day = Integer.parseInt(splittedDate[2]);
         String hexString = DateToHexString(Year , Month , Day);
         return new ObjectId(hexString);
+    }
+
+    public static class WrongDateFormatException extends Exception
+    {
+        WrongDateFormatException(String message)
+        {
+            super(message);
+        }
     }
 }

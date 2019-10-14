@@ -1,12 +1,10 @@
+import java.rmi.ServerException;
+
 public interface WeatherstationDAO
 {
-    String InsertToDatabase(String json);
+    String setWeatherstationData(String json , String weatherstationName) throws ServerException;
 
-    String findAllFromDatabase();
+    String getWeatherstationData(String weatherstationName, String contentType);
 
-    String findOneFromDatabase(String key);
-
-    String findSpecFieldsFromDatabase(String key);
-
-    String findSpecFieldsFromDatabaseDATE(String date);
+    String getWeatherstationData(String date , String weatherstationName, String contentType);
 }
