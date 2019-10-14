@@ -44,22 +44,20 @@ public class MongoDBDAO implements WeatherstationDAO {
                 "payload_fields.barometer_data",
                 "payload_fields.rain_rate"),
                 excludeId()));
-        if(contentType.equals("netcdf"))
+        if(contentType != null && contentType.equals("netcdf"))
         {
             //TODO Convert JSON to netcdf and return it.
             return "Not Yet Implemented. Use contenttype = json";
         }
-        if(iterable != null) {
-            returnString.append("[");
-            for (Document document : iterable) {
-                returnString.append(document.toJson()).append(",");
+        else {
+            if (iterable != null) {
+                returnString.append("[");
+                for (Document document : iterable) {
+                    returnString.append(document.toJson()).append(",");
+                }
+                returnString.delete(returnString.length() - 1, returnString.length());
+                returnString.append("]");
             }
-            returnString.delete(returnString.length()-1 , returnString.length());
-            returnString.append("]");
-        }
-        if(returnString.length() == 0)
-        {
-            returnString.append("We couldn't find any data with the given criteria");
         }
         return returnString.toString();
     }
