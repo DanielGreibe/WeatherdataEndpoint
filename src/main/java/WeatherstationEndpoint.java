@@ -1,5 +1,6 @@
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
+import java.rmi.ServerException;
 
 /**
  * Provides an endpoint for weather data from multiple weather-stations located at various locations.
@@ -16,10 +17,18 @@ public class WeatherstationEndpoint {
      */
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
-    public String postMessage(String message, @PathParam("weatherstation") String weatherstationName)
+    public String setWeatherstationData(String message, @PathParam("weatherstation") String weatherstationName)
     {
-        System.out.println("Fik POST med " + message);
-        return database.InsertToDatabase(message , weatherstationName);
+        System.out.println("Kald setWeatherstationData(message , weatherstationName) med " + message + " og " + weatherstationName);
+        try
+        {
+            return database.setWeatherstationData(message , weatherstationName);
+        }
+        catch(ServerException se)
+        {
+            return se.getMessage();
+        }
+
     }
 
 
@@ -29,11 +38,11 @@ public class WeatherstationEndpoint {
      * @return a JSON string with all data in the database.
      */
     @GET
-    public String getAll(@PathParam("weatherstation") String weatherstationName)
+    public String getWeatherstationData(@PathParam("weatherstation") String weatherstationName)
     {
-        System.out.println("getALL() blev kaldt");
+        System.out.println("Kald getWeatherstationData(weatherstationName) med " + weatherstationName);
         //Returns all content in the database in JSON format.
-        return database.findAllFromDatabase(weatherstationName);
+        return database.getWeatherstationData(weatherstationName);
     }
 
     /**
@@ -44,9 +53,9 @@ public class WeatherstationEndpoint {
      */
     @GET
     @Path("{date}")
-    public String getOne(@PathParam("date") String date , @PathParam("weatherstation") String weatherstationName)
+    public String getWeatherstationData(@PathParam("date") String date , @PathParam("weatherstation") String weatherstationName)
     {
-        System.out.println("Kald getOne med " + date);
+        System.out.println("Kald getWeatherstationData(date,weatherstationName) med " + date + " og " + weatherstationName);
         return database.getWeatherstationData(date , weatherstationName);
     }
 }

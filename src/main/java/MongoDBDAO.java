@@ -1,94 +1,48 @@
-import com.mongodb.MongoException;
+import com.mongodb.*;
 import com.mongodb.client.*;
 import org.bson.Document;
 import org.bson.types.ObjectId;
+
+import java.rmi.ServerException;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.InputMismatchException;
 
 import static com.mongodb.client.model.Filters.*;
-import static com.mongodb.client.model.Projections.*;
-
 public class MongoDBDAO implements WeatherstationDAO {
 
 
 
     @Override
-    public String InsertToDatabase(String jsonMessage, String weatherstationName) {
+    public String setWeatherstationData(String jsonMessage, String weatherstationName) throws ServerException {
         MongoCollection<Document> collection = MongoConnection.getInstance("AgricircleDB").getDatabase().getCollection(weatherstationName);
-
-
         try {
             collection.insertOne(Document.parse(jsonMessage));
             return "Database updated";
-        } catch (MongoException mwe) {
-            //  Block of code to handle error
-            return mwe.getMessage();
-            //throw new DBException("Soe")
+        } catch (MongoWriteException | MongoWriteConcernException e) {
+            throw new ServerException(e.getMessage());
         }
     }
 
     @Override
-    public String findAllFromDatabase(String weatherstationName) {
-
+    public String getWeatherstationData(String weatherstationName)
+    {
         MongoCollection<Document> collection = MongoConnection.getInstance("AgricircleDB").getDatabase().getCollection(weatherstationName);
-
-        try {
-            StringBuilder returnString = new StringBuilder();
-            FindIterable<Document> iterable = collection.find();
+        StringBuilder returnString = new StringBuilder();
+        FindIterable<Document> iterable = collection.find();
+        if(iterable != null) {
             for (Document document : iterable) {
                 returnString.append(document.toJson());
             }
-            return returnString.toString();
-        } catch (MongoException mwe) {
-            //  Block of code to handle errors
-            return mwe.getMessage();
         }
+        if(returnString.length() == 0)
+        {
+            returnString.append("We couldn't find any data with the given criteria");
+        }
+        return returnString.toString();
     }
 
-    @Override
-    public String findOneFromDatabase(String key) {
-        MongoCollection<Document> collection = MongoConnection.getInstance("AgricircleDB").getDatabase().getCollection("Weatherstation1");
 
-        try {
-            Document doc = collection.find(eq("dev_id", key)).first();
-            if (doc != null) {
-                return doc.toJson();
-            } else {
-                return "Could not find any data with the given criterias";
-            }
-        } catch (MongoException mwe) {
-            //  Block of code to handle errors
-            return mwe.getMessage();
-        }
-    }
-
-    @Override
-    public String findSpecFieldsFromDatabase(String key) {
-        MongoCollection<Document> collection = MongoConnection.getInstance("AgricircleDB").getDatabase().getCollection("Weatherstation1");
-        try {
-            StringBuilder returnString = new StringBuilder();
-            FindIterable<Document> iterable = collection.find(eq("dev_id", key))
-                    .projection(fields(include( "payload_fields.avg_wind_speed",
-                            "payload_fields.solar_radiation",
-                            "payload_fields.outside_temperature",
-                            "payload_fields.outside_humidity",
-                            "payload_fields.barometer_data",
-                            "payload_fields.rain_rate"),
-                            excludeId()));
-            if (iterable != null) {
-                for (Document document : iterable) {
-                    returnString.append(document.toJson());
-                }
-                return returnString.toString();
-            } else {
-                return "Could not find any data with the given criterias";
-            }
-        } catch (MongoException mwe) {
-            //  Block of code to handle errors
-            return mwe.getMessage();
-        }
-    }
 
     public String getWeatherstationData(String stringDate , String weatherstationName){
         MongoCollection<Document> collection = MongoConnection.getInstance("AgricircleDB").getDatabase().getCollection(weatherstationName);
@@ -96,7 +50,6 @@ public class MongoDBDAO implements WeatherstationDAO {
         StringBuilder returnString = new StringBuilder();
         ObjectId date = DateToObjectId(stringDate);
         FindIterable<Document> iterable = collection.find(gte("_id" , date));
-        System.out.println(iterable);
         if (iterable != null) {
             for (Document document : iterable) {
                 returnString.append(document.toJson());
@@ -104,7 +57,7 @@ public class MongoDBDAO implements WeatherstationDAO {
         }
         if(returnString.length() == 0)
         {
-            return "We couldn't find any data with the given criteria";
+            returnString.append("We couldn't find any data with the given criteria");
         }
         return returnString.toString();
     }
@@ -142,4 +95,51 @@ public class MongoDBDAO implements WeatherstationDAO {
         String hexString = DateToHexString(Year , Month , Day);
         return new ObjectId(hexString);
     }
+
+
+
+
+    /*
+    public String findOneFromDatabase(String key) {
+        MongoCollection<Document> collection = MongoConnection.getInstance("AgricircleDB").getDatabase().getCollection("Weatherstation1");
+
+        try {
+            Document doc = collection.find(eq("dev_id", key)).first();
+            if (doc != null) {
+                return doc.toJson();
+            } else {
+                return "Could not find any data with the given criterias";
+            }
+        } catch (MongoException mwe) {
+            //  Block of code to handle errors
+            return mwe.getMessage();
+        }
+    }
+
+    public String findSpecFieldsFromDatabase(String key) {
+        MongoCollection<Document> collection = MongoConnection.getInstance("AgricircleDB").getDatabase().getCollection("Weatherstation1");
+        try {
+            StringBuilder returnString = new StringBuilder();
+            FindIterable<Document> iterable = collection.find(eq("dev_id", key))
+                    .projection(fields(include( "payload_fields.avg_wind_speed",
+                            "payload_fields.solar_radiation",
+                            "payload_fields.outside_temperature",
+                            "payload_fields.outside_humidity",
+                            "payload_fields.barometer_data",
+                            "payload_fields.rain_rate"),
+                            excludeId()));
+            if (iterable != null) {
+                for (Document document : iterable) {
+                    returnString.append(document.toJson());
+                }
+                return returnString.toString();
+            } else {
+                return "Could not find any data with the given criterias";
+            }
+        } catch (MongoException mwe) {
+            //  Block of code to handle errors
+            return mwe.getMessage();
+        }
+    }
+     */
 }
