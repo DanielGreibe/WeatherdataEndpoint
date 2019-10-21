@@ -1,109 +1,109 @@
 public class Weatherdata {
 
-    private int averageWindSpeed;
-    private double barometerData;
-    private int outsideHumidity;
-    private double outsideTemperature;
-    private int rainRate;
-    private int solarRadiation;
+    private int average_wind_speed;
+    private double barometer_data;
+    private int outside_humidity;
+    private double outside_temperature;
+    private int rain_rate;
+    private int solar_radiation;
 
 
     public Weatherdata build()
     {
         Weatherdata weatherdata = new Weatherdata();
-        weatherdata.averageWindSpeed = this.averageWindSpeed;
-        weatherdata.barometerData = this.barometerData;
-        weatherdata.outsideHumidity = this.outsideHumidity;
-        weatherdata.outsideTemperature = this.outsideTemperature;
-        weatherdata.rainRate = this.rainRate;
-        weatherdata.solarRadiation = this.solarRadiation;
+        weatherdata.average_wind_speed = this.average_wind_speed;
+        weatherdata.barometer_data = this.barometer_data;
+        weatherdata.outside_humidity = this.outside_humidity;
+        weatherdata.outside_temperature = this.outside_temperature;
+        weatherdata.rain_rate = this.rain_rate;
+        weatherdata.solar_radiation = this.solar_radiation;
 
         return weatherdata;
     }
 
     public Weatherdata averageWindSpeed(int averageWindSpeed)
     {
-        this.averageWindSpeed = averageWindSpeed;
+        this.average_wind_speed = averageWindSpeed;
 
         return this;
     }
 
     public Weatherdata barometerData(double barometerData)
     {
-        this.barometerData = barometerData;
+        this.barometer_data = barometerData;
         return this;
     }
 
     public Weatherdata outsideHumidity(int outsideHumidity)
     {
-        this.outsideHumidity = outsideHumidity;
+        this.outside_humidity = outsideHumidity;
         return this;
     }
 
     public Weatherdata outsideTemperature(double outsideTemperature)
     {
-        this.outsideTemperature = outsideTemperature;
+        this.outside_temperature = outsideTemperature;
         return this;
     }
 
     public Weatherdata rainRate(int rainRate)
     {
-        this.rainRate = rainRate;
+        this.rain_rate = rainRate;
         return this;
     }
 
     public Weatherdata solarRadiation(int solarRadiation)
     {
-        this.solarRadiation = solarRadiation;
+        this.solar_radiation = solarRadiation;
         return this;
     }
 
-    public int getAverageWindSpeed() {
-        return averageWindSpeed;
+    public int getAverage_wind_speed() {
+        return average_wind_speed;
     }
 
-    public void setAverageWindSpeed(int averageWindSpeed) {
-        this.averageWindSpeed = averageWindSpeed;
+    public void setAverage_wind_speed(int average_wind_speed) {
+        this.average_wind_speed = average_wind_speed;
     }
 
-    public double getBarometerData() {
-        return barometerData;
+    public double getBarometer_data() {
+        return barometer_data;
     }
 
-    public void setBarometerData(double barometerData) {
-        this.barometerData = barometerData;
+    public void setBarometer_data(double barometer_data) {
+        this.barometer_data = barometer_data;
     }
 
-    public int getOutsideHumidity() {
-        return outsideHumidity;
+    public int getOutside_humidity() {
+        return outside_humidity;
     }
 
-    public void setOutsideHumidity(int outsideHumidity) {
-        this.outsideHumidity = outsideHumidity;
+    public void setOutside_humidity(int outside_humidity) {
+        this.outside_humidity = outside_humidity;
     }
 
-    public double getOutsideTemperature() {
-        return outsideTemperature;
+    public double getOutside_temperature() {
+        return outside_temperature;
     }
 
-    public void setOutsideTemperature(double outsideTemperature) {
-        this.outsideTemperature = outsideTemperature;
+    public void setOutside_temperature(double outside_temperature) {
+        this.outside_temperature = outside_temperature;
     }
 
-    public int getRainRate() {
-        return rainRate;
+    public int getRain_rate() {
+        return rain_rate;
     }
 
-    public void setRainRate(int rainRate) {
-        this.rainRate = rainRate;
+    public void setRain_rate(int rain_rate) {
+        this.rain_rate = rain_rate;
     }
 
-    public int getSolarRadiation() {
-        return solarRadiation;
+    public int getSolar_radiation() {
+        return solar_radiation;
     }
 
-    public void setSolarRadiation(int solarRadiation) {
-        this.solarRadiation = solarRadiation;
+    public void setSolar_radiation(int solar_radiation) {
+        this.solar_radiation = solar_radiation;
     }
 
 }

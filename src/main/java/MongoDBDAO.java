@@ -39,7 +39,7 @@ public class MongoDBDAO implements WeatherstationDAO {
         if(contentType == ContentType.NETCDF)
         {
             //TODO Convert JSON to netcdf and return it.
-            return "Not Yet Implemented. Use contenttype = json";
+            throw new NotImplementedException();
         }
         else {
             if (iterable != null) {
