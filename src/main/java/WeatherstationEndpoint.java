@@ -1,6 +1,5 @@
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
-import java.rmi.ServerException;
 
 /**
  * Provides an endpoint for weather data from multiple weather-stations located at various locations.
@@ -19,8 +18,7 @@ public class WeatherstationEndpoint {
      */
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
-    public String setWeatherstationData(String message, @PathParam("weatherstation") String weatherstationName)
-    {
+    public String setWeatherstationData(String message, @PathParam("weatherstation") String weatherstationName) throws ServerException {
         System.out.println("Kald setWeatherstationData(message , weatherstationName) med " + message + " og " + weatherstationName);
         try
         {
@@ -28,7 +26,8 @@ public class WeatherstationEndpoint {
         }
         catch(ServerException se)
         {
-            return se.getMessage();
+            System.out.println(se.getMessage());
+            throw se;
         }
 
     }
@@ -36,11 +35,11 @@ public class WeatherstationEndpoint {
     /**
      * Provides all data stored in the database from the weather station stated in the weatherstationName parameter.
      * @param weatherstationName the name of the weather station to get data from. (Not Yet Implemented!)
-     * @param contentType the type of content the API produces. Can be netcdf or json. Only json is possible atm.
+     * @param contentType the type of content the API produces. Can be NETCDF or JSON. Only JSON is possible atm.
      * @return a JSON string with all data in the database.
      */
     @GET
-    public String getWeatherstationData(@PathParam("weatherstation") String weatherstationName , @QueryParam("contenttype") String contentType)
+    public String getWeatherstationData(@PathParam("weatherstation") String weatherstationName , @QueryParam("contenttype") ContentType contentType)
     {
         System.out.println(
                 "Kald getWeatherstationData(date,weatherstationName, contentType): \n" +
@@ -59,8 +58,7 @@ public class WeatherstationEndpoint {
      */
     @GET
     @Path("{date}")
-    public String getWeatherstationData(@PathParam("date") String date , @PathParam("weatherstation") String weatherstationName , @QueryParam("contenttype") String contentType)
-    {
+    public String getWeatherstationData(@PathParam("date") String date , @PathParam("weatherstation") String weatherstationName , @QueryParam("contenttype") ContentType contentType) throws WrongDateFormatException {
         System.out.println(
                 "Kald getWeatherstationData(date,weatherstationName, contentType): " +
                 "\n Date: " + date +

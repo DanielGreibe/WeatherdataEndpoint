@@ -2,7 +2,7 @@ import com.mongodb.*;
 import com.mongodb.client.*;
 import org.bson.Document;
 import org.bson.types.ObjectId;
-import java.rmi.ServerException;
+import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 import java.util.Calendar;
 import java.util.Date;
 import static com.mongodb.client.model.Filters.*;
@@ -14,10 +14,6 @@ public class MongoDBDAO implements WeatherstationDAO {
 
     @Override
     public String setWeatherstationData(String jsonMessage, String weatherstationName) throws ServerException {
-        //For Production:
-        //MongoCollection<Document> collection = MongoConnection.getInstance("AgricircleDB").getDatabase().getCollection(weatherstationName);
-
-        //For Development:
         MongoCollection<Document> collection = MongoConnection.getInstance("AgricircleDB").getDatabase().getCollection("Weatherstation1");
         try {
             collection.insertOne(Document.parse(jsonMessage));
@@ -28,12 +24,8 @@ public class MongoDBDAO implements WeatherstationDAO {
     }
 
     @Override
-    public String getWeatherstationData(String weatherstationName , String contentType)
+    public String getWeatherstationData(String weatherstationName , ContentType contentType)
     {
-        //For Production:
-        //MongoCollection<Document> collection = MongoConnection.getInstance("AgricircleDB").getDatabase().getCollection(weatherstationName);
-
-        //For Development:
         MongoCollection<Document> collection = MongoConnection.getInstance("AgricircleDB").getDatabase().getCollection("Weatherstation1");
         StringBuilder returnString = new StringBuilder();
         FindIterable<Document> iterable = collection.find().projection(fields(include(
@@ -44,7 +36,7 @@ public class MongoDBDAO implements WeatherstationDAO {
                 "payload_fields.barometer_data",
                 "payload_fields.rain_rate"),
                 excludeId()));
-        if(contentType != null && contentType.equals("netcdf"))
+        if(contentType == ContentType.NETCDF)
         {
             //TODO Convert JSON to netcdf and return it.
             return "Not Yet Implemented. Use contenttype = json";
@@ -64,22 +56,15 @@ public class MongoDBDAO implements WeatherstationDAO {
 
 
 
-    public String getWeatherstationData(String stringDate , String weatherstationName , String contentType){
-        //For Production:
-        //MongoCollection<Document> collection = MongoConnection.getInstance("AgricircleDB").getDatabase().getCollection(weatherstationName);
-
-        //For Development:
+    public String getWeatherstationData(String stringDate , String weatherstationName , ContentType contentType) throws WrongDateFormatException {
+        // Currently The weatherstation sends a POST message to the url /rest/weatherstation which would result in data being sent to a collection named
+        // weatherstation. The current data is saved in the collection Weatherstation1. This is why .getCollection takes the hardcoded string Weatherstation1
+        // instead of the weatherstationName field.
         MongoCollection<Document> collection = MongoConnection.getInstance("AgricircleDB").getDatabase().getCollection("Weatherstation1");
 
         StringBuilder returnString = new StringBuilder();
         ObjectId date;
-        try{
-             date = DateToObjectId(stringDate);
-        }
-        catch(WrongDateFormatException wdfe)
-        {
-            return wdfe.getMessage();
-        }
+        date = DateToObjectId(stringDate);
 
         FindIterable<Document> iterable = collection.find(gte("_id" , date)).
                 projection(fields(include(
@@ -91,10 +76,10 @@ public class MongoDBDAO implements WeatherstationDAO {
                         "payload_fields.rain_rate"),
                         excludeId()));
 
-        if(contentType!= null && contentType.equals("netcdf"))
+        if(contentType == ContentType.NETCDF)
         {
             //TODO Convert JSON to netcdf and return it.
-            return "Not Yet Implemented. Use contenttype = json";
+            throw new NotImplementedException();
         }
         else
         {
@@ -118,7 +103,7 @@ public class MongoDBDAO implements WeatherstationDAO {
 
         if(calendar.getTime().after(new Date()))
         {
-            throw new WrongDateFormatException("Date should be earlier than current date");
+            throw new WrongDateFormatException("Provided date should be earlier than current date");
         }
         long time = (calendar.getTimeInMillis() / 1000);
         return Long.toHexString(time) + "0000000000000000";
@@ -140,13 +125,5 @@ public class MongoDBDAO implements WeatherstationDAO {
         int Day = Integer.parseInt(splittedDate[2]);
         String hexString = DateToHexString(Year , Month , Day);
         return new ObjectId(hexString);
-    }
-
-    public static class WrongDateFormatException extends Exception
-    {
-        WrongDateFormatException(String message)
-        {
-            super(message);
-        }
     }
 }

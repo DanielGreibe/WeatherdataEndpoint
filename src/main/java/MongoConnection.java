@@ -8,29 +8,28 @@ import com.mongodb.client.MongoDatabase;
  * */
 public class MongoConnection
 {
-    private static boolean TestEnvironment = false;
-    private static MongoConnection mongoTestConnection = null;
-    private static MongoConnection mongoProductionConnection = null;
+
+    private static boolean TestEnvironment = Boolean.parseBoolean(System.getenv("NITRO_TESTENVIRONMENT"));
+    private static MongoConnection mongoConnection = null;
 
     public static MongoConnection getInstance(String database)
     {
         if(TestEnvironment)
         {
-            if (mongoTestConnection == null)
+            if (mongoConnection == null)
             {
-                mongoTestConnection = new MongoConnection("test");
-
+                mongoConnection = new MongoConnection("test");
             }
-            return mongoTestConnection;
+            return mongoConnection;
         }
         else
         {
-            if (mongoProductionConnection == null)
+            if (mongoConnection == null)
             {
-                mongoProductionConnection = new MongoConnection(database);
+                mongoConnection = new MongoConnection(database);
 
             }
-            return mongoProductionConnection;
+            return mongoConnection;
         }
     }
 
