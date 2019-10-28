@@ -2,32 +2,43 @@ import com.mongodb.*;
 import com.mongodb.client.*;
 import org.bson.Document;
 import org.bson.types.ObjectId;
+import org.jetbrains.annotations.NotNull;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
+
+import javax.print.Doc;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
+
 import static com.mongodb.client.model.Filters.*;
 import static com.mongodb.client.model.Projections.*;
 
 public class MongoDBDAO implements WeatherstationDAO {
 
 
+    private static final String PAYLOAD_FIELDS = "payload_fields";
+    private static final String AVG_WIND_SPEED = "avg_wind_speed";
+    private static final String BAROMETER_DATA = "barometer_data";
+    private static final String OUTSIDE_HUMIDITY = "outside_humidity";
+    private static final String OUTSIDE_TEMPERATURE = "outside_temperature";
+    private static final String RAIN_RATE = "rain_rate";
+    private static final String SOLAR_RADIATION = "solar_radiation";
 
     @Override
-    public String setWeatherstationData(String jsonMessage, String weatherstationName) throws ServerException {
+    public void setWeatherstationData(String jsonMessage, String weatherstationName) throws ServerException {
         MongoCollection<Document> collection = MongoConnection.getInstance("AgricircleDB").getDatabase().getCollection("Weatherstation1");
         try {
             collection.insertOne(Document.parse(jsonMessage));
-            return "Database updated";
         } catch (MongoWriteException | MongoWriteConcernException e) {
             throw new ServerException(e.getMessage());
         }
     }
 
     @Override
-    public String getWeatherstationData(String weatherstationName , ContentType contentType)
+    public List<WeatherData> getWeatherstationData(String weatherstationName , ContentType contentType)
     {
         MongoCollection<Document> collection = MongoConnection.getInstance("AgricircleDB").getDatabase().getCollection("Weatherstation1");
-        StringBuilder returnString = new StringBuilder();
         FindIterable<Document> iterable = collection.find().projection(fields(include(
                 "payload_fields.avg_wind_speed",
                 "payload_fields.solar_radiation",
@@ -42,21 +53,12 @@ public class MongoDBDAO implements WeatherstationDAO {
             throw new NotImplementedException();
         }
         else {
-            if (iterable != null) {
-                returnString.append("[");
-                for (Document document : iterable) {
-                    returnString.append(document.toJson()).append(",");
-                }
-                returnString.delete(returnString.length() - 1, returnString.length());
-                returnString.append("]");
-            }
+            return DocumentToWeatherData(iterable);
         }
-        return returnString.toString();
     }
 
 
-
-    public String getWeatherstationData(String stringDate , String weatherstationName , ContentType contentType) throws WrongDateFormatException {
+    public List<WeatherData> getWeatherstationData(String stringDate , String weatherstationName , ContentType contentType) throws WrongDateFormatException {
         // Currently The weatherstation sends a POST message to the url /rest/weatherstation which would result in data being sent to a collection named
         // weatherstation. The current data is saved in the collection Weatherstation1. This is why .getCollection takes the hardcoded string Weatherstation1
         // instead of the weatherstationName field.
@@ -83,16 +85,8 @@ public class MongoDBDAO implements WeatherstationDAO {
         }
         else
         {
-            if (iterable != null) {
-                returnString.append("{\"dataobjects\":[");
-                for (Document document : iterable) {
-                    returnString.append(document.toJson()).append(",");
-                }
-                returnString.delete(returnString.length() - 1, returnString.length());
-                returnString.append("]}");
-            }
+            return DocumentToWeatherData(iterable);
         }
-        return returnString.toString();
     }
 
     private static String DateToHexString(int year, int month, int day) throws WrongDateFormatException {
@@ -125,5 +119,24 @@ public class MongoDBDAO implements WeatherstationDAO {
         int Day = Integer.parseInt(splittedDate[2]);
         String hexString = DateToHexString(Year , Month , Day);
         return new ObjectId(hexString);
+    }
+
+    @NotNull
+    private List<WeatherData> DocumentToWeatherData(FindIterable<Document> iterable) {
+        List<Document> into = iterable.into(new ArrayList<>());
+        List<WeatherData> weatherData = new ArrayList<>();
+        for(Document doc: into){
+            Document document = doc.get(PAYLOAD_FIELDS, Document.class);
+            WeatherData temp = WeatherData.builder()
+                    .average_wind_speed(document.getInteger(AVG_WIND_SPEED))
+                    .barometer_data(document.getDouble(BAROMETER_DATA))
+                    .outside_humidity(document.getInteger(OUTSIDE_HUMIDITY))
+                    .outside_temperature(document.getDouble(OUTSIDE_TEMPERATURE))
+                    .rain_rate(document.getInteger(RAIN_RATE))
+                    .solar_radiation(document.getInteger(SOLAR_RADIATION))
+                    .build();
+            weatherData.add(temp);
+        }
+        return weatherData;
     }
 }

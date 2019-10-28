@@ -1,3 +1,4 @@
+import com.google.gson.Gson;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 
@@ -14,22 +15,20 @@ public class WeatherstationEndpoint {
      * Inserts a text/JSON formatted String provided in the 'message' parameter to the database in the collection / table with the name provided in the 'weatherstationName' parameter.
      * @param message contains the text/JSON formatted String to be inserted in the database.
      * @param weatherstationName the name of the weatherstation that provided the data (Not Yet Implemented!)
-     * @return returns 'Database updated' if the procedure succeeded or the error message.
      */
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
-    public String setWeatherstationData(String message, @PathParam("weatherstation") String weatherstationName) throws ServerException {
+    public void setWeatherstationData(String message, @PathParam("weatherstation") String weatherstationName) throws ServerException {
         System.out.println("Kald setWeatherstationData(message , weatherstationName) med " + message + " og " + weatherstationName);
         try
         {
-            return database.setWeatherstationData(message , weatherstationName);
+           database.setWeatherstationData(message , weatherstationName);
         }
         catch(ServerException se)
         {
             System.out.println(se.getMessage());
             throw se;
         }
-
     }
 
     /**
@@ -46,7 +45,7 @@ public class WeatherstationEndpoint {
                         "Weatherstation Name: " + weatherstationName + "\n" +
                         "ContentType: " + contentType);
         //Returns all content in the database in JSON format.
-        return database.getWeatherstationData(weatherstationName , contentType);
+        return new Gson().toJson(database.getWeatherstationData(weatherstationName , contentType));
     }
 
     /**
@@ -64,6 +63,6 @@ public class WeatherstationEndpoint {
                 "\n Date: " + date +
                 "\n Weatherstation Name: " + weatherstationName +
                 "\n ContentType: " + contentType);
-        return database.getWeatherstationData(date , weatherstationName , contentType);
+        return new Gson().toJson(database.getWeatherstationData(date, weatherstationName , contentType));
     }
 }

@@ -1,8 +1,10 @@
+import java.util.List;
+
 public interface WeatherstationDAO
 {
-    String setWeatherstationData(String json , String weatherstationName) throws ServerException;
+    void setWeatherstationData(String json , String weatherstationName) throws ServerException;
 
-    String getWeatherstationData(String weatherstationName, ContentType contentType);
+    List<WeatherData> getWeatherstationData(String weatherstationName, ContentType contentType);
 
-    String getWeatherstationData(String date , String weatherstationName, ContentType contentType) throws WrongDateFormatException;
+    List<WeatherData> getWeatherstationData(String date , String weatherstationName, ContentType contentType) throws WrongDateFormatException;
 }
