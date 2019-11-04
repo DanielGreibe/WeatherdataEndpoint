@@ -16,5 +16,6 @@ public class WeatherData {
     private int rain_rate;
     private int solar_radiation;
     private String time;
+    private String dev_id;
 
 }
