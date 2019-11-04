@@ -123,20 +123,17 @@ public class MongoDBDAO implements WeatherstationDAO {
             Document document = doc.get(PAYLOAD_FIELDS, Document.class);
             Document document2 = doc.get("metadata", Document.class);
 
-            double avg_wind_speed;
-            double outside_temperature;
-            double barometer_data;
-
 
             if (document == null || document2 == null) {
                 log.error("Document is null, skipped document");
                 log.error(doc.toString());
 
             } else {
+                System.out.println(doc);
                 WeatherData temp = WeatherData.builder()
-                        .average_wind_speed(new Double(document.getString(AVG_WIND_SPEED)))
-                        .outside_temperature(new Double(document.getString(OUTSIDE_TEMPERATURE)))
-                        .barometer_data(new Double(document.getString(BAROMETER_DATA)))
+                        .average_wind_speed(new Double(document.get(AVG_WIND_SPEED) + ""))
+                        .outside_temperature(new Double(document.get(OUTSIDE_TEMPERATURE) + ""))
+                        .barometer_data(new Double(document.get(BAROMETER_DATA) + ""))
                         .outside_humidity(document.getInteger(OUTSIDE_HUMIDITY))
                         .rain_rate(document.getInteger(RAIN_RATE))
                         .solar_radiation(document.getInteger(SOLAR_RADIATION))
