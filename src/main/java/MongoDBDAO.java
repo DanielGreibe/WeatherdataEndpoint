@@ -1,5 +1,6 @@
 import com.mongodb.*;
 import com.mongodb.client.*;
+import lombok.extern.slf4j.Slf4j;
 import org.bson.Document;
 import org.bson.types.ObjectId;
 import org.jetbrains.annotations.NotNull;
@@ -10,6 +11,7 @@ import java.util.List;
 import static com.mongodb.client.model.Filters.*;
 import static com.mongodb.client.model.Projections.*;
 
+@Slf4j
 public class MongoDBDAO implements WeatherstationDAO {
 
 
@@ -127,31 +129,14 @@ public class MongoDBDAO implements WeatherstationDAO {
 
 
             if (document == null || document2 == null) {
-                System.out.println("Document is null, skipped document");
+                log.error("Document is null, skipped document");
+                log.error(doc.toString());
 
             } else {
-                if (document.get(AVG_WIND_SPEED).toString().contains(".")) {
-                    avg_wind_speed = document.getDouble(AVG_WIND_SPEED);
-                } else {
-                    //Doesn't contain a . but should since its a double so i add it explicitly.
-                    avg_wind_speed = Double.parseDouble(document.getInteger(AVG_WIND_SPEED).toString() + ".0");
-                }
-                if (document.get(BAROMETER_DATA).toString().contains(".")) {
-                    barometer_data = document.getDouble(BAROMETER_DATA);
-                } else {
-                    //Doesn't contain a . but should since its a double so i add it explicitly.
-                    barometer_data = Double.parseDouble(document.getInteger(BAROMETER_DATA).toString() + ".0");
-                }
-                if (document.get(OUTSIDE_TEMPERATURE).toString().contains(".")) {
-                    outside_temperature = document.getDouble(OUTSIDE_TEMPERATURE);
-                } else {
-                    outside_temperature = Double.parseDouble(document.getInteger(OUTSIDE_TEMPERATURE).toString() + ".0");
-                }
-
                 WeatherData temp = WeatherData.builder()
-                        .average_wind_speed(avg_wind_speed)
-                        .outside_temperature(outside_temperature)
-                        .barometer_data(barometer_data)
+                        .average_wind_speed(new Double(document.getString(AVG_WIND_SPEED)))
+                        .outside_temperature(new Double(document.getString(OUTSIDE_TEMPERATURE)))
+                        .barometer_data(new Double(document.getString(BAROMETER_DATA)))
                         .outside_humidity(document.getInteger(OUTSIDE_HUMIDITY))
                         .rain_rate(document.getInteger(RAIN_RATE))
                         .solar_radiation(document.getInteger(SOLAR_RADIATION))
@@ -161,7 +146,6 @@ public class MongoDBDAO implements WeatherstationDAO {
                 weatherData.add(temp);
 
             }
-
         }
         return weatherData;
     }
