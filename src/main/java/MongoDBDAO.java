@@ -4,13 +4,10 @@ import org.bson.Document;
 import org.bson.types.ObjectId;
 import org.jetbrains.annotations.NotNull;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
-
-import javax.print.Doc;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
-
 import static com.mongodb.client.model.Filters.*;
 import static com.mongodb.client.model.Projections.*;
 
@@ -45,7 +42,8 @@ public class MongoDBDAO implements WeatherstationDAO {
                 "payload_fields.outside_temperature",
                 "payload_fields.outside_humidity",
                 "payload_fields.barometer_data",
-                "payload_fields.rain_rate"),
+                "payload_fields.rain_rate",
+                "metadata.time"),
                 excludeId()));
         if(contentType == ContentType.NETCDF)
         {
@@ -64,7 +62,6 @@ public class MongoDBDAO implements WeatherstationDAO {
         // instead of the weatherstationName field.
         MongoCollection<Document> collection = MongoConnection.getInstance("AgricircleDB").getDatabase().getCollection("Weatherstation1");
 
-        StringBuilder returnString = new StringBuilder();
         ObjectId date;
         date = DateToObjectId(stringDate);
 
@@ -75,7 +72,8 @@ public class MongoDBDAO implements WeatherstationDAO {
                         "payload_fields.outside_temperature",
                         "payload_fields.outside_humidity",
                         "payload_fields.barometer_data",
-                        "payload_fields.rain_rate"),
+                        "payload_fields.rain_rate",
+                        "metadata.time"),
                         excludeId()));
 
         if(contentType == ContentType.NETCDF)
@@ -127,15 +125,40 @@ public class MongoDBDAO implements WeatherstationDAO {
         List<WeatherData> weatherData = new ArrayList<>();
         for(Document doc: into){
             Document document = doc.get(PAYLOAD_FIELDS, Document.class);
-            WeatherData temp = WeatherData.builder()
-                    .average_wind_speed(document.getInteger(AVG_WIND_SPEED))
-                    .barometer_data(document.getDouble(BAROMETER_DATA))
-                    .outside_humidity(document.getInteger(OUTSIDE_HUMIDITY))
-                    .outside_temperature(document.getDouble(OUTSIDE_TEMPERATURE))
-                    .rain_rate(document.getInteger(RAIN_RATE))
-                    .solar_radiation(document.getInteger(SOLAR_RADIATION))
-                    .build();
-            weatherData.add(temp);
+            Document document2 = doc.get("metadata", Document.class);
+
+            double avg_wind_speed;
+            double outside_temperature;
+
+            if(document.get(AVG_WIND_SPEED).toString().contains("."))
+            {
+                avg_wind_speed = document.getDouble(AVG_WIND_SPEED);
+            }
+            else
+            {
+                //Doesn't contain a . but should since its a double so i add it explicitly.
+                 avg_wind_speed = Double.parseDouble(document.getInteger(AVG_WIND_SPEED).toString() + ".0");
+            }
+            if(document.get(OUTSIDE_TEMPERATURE).toString().contains("."))
+            {
+                outside_temperature = document.getDouble(OUTSIDE_TEMPERATURE);
+            }
+            else
+            {
+                outside_temperature = Double.parseDouble(document.getInteger(OUTSIDE_TEMPERATURE).toString() + ".0");
+            }
+
+                WeatherData temp = WeatherData.builder()
+                        .average_wind_speed(avg_wind_speed)
+                        .outside_temperature(outside_temperature)
+                        .barometer_data(document.getDouble(BAROMETER_DATA))
+                        .outside_humidity(document.getInteger(OUTSIDE_HUMIDITY))
+                        .rain_rate(document.getInteger(RAIN_RATE))
+                        .solar_radiation(document.getInteger(SOLAR_RADIATION))
+                        .time(document2.getString("time")).build();
+
+                weatherData.add(temp);
+
         }
         return weatherData;
     }
