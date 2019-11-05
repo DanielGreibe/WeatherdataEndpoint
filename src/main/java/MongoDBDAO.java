@@ -22,6 +22,8 @@ public class MongoDBDAO implements WeatherstationDAO {
     private static final String OUTSIDE_TEMPERATURE = "outside_temperature";
     private static final String RAIN_RATE = "rain_rate";
     private static final String SOLAR_RADIATION = "solar_radiation";
+    public static final String STATION_ID = "dev_id";
+    public static final String TIME = "time";
 
     @Override
     public void setWeatherstationData(String jsonMessage, String weatherstationName) throws ServerException {
@@ -129,7 +131,6 @@ public class MongoDBDAO implements WeatherstationDAO {
                 log.error(doc.toString());
 
             } else {
-                System.out.println(doc);
                 WeatherData temp = WeatherData.builder()
                         .average_wind_speed(new Double(document.get(AVG_WIND_SPEED) + ""))
                         .outside_temperature(new Double(document.get(OUTSIDE_TEMPERATURE) + ""))
@@ -137,8 +138,11 @@ public class MongoDBDAO implements WeatherstationDAO {
                         .outside_humidity(document.getInteger(OUTSIDE_HUMIDITY))
                         .rain_rate(document.getInteger(RAIN_RATE))
                         .solar_radiation(document.getInteger(SOLAR_RADIATION))
-                        .dev_id(doc.getString("dev_id"))
-                        .time(document2.getString("time")).build();
+                        .station_id(doc.getString(STATION_ID))
+                        .time(document2.getString(TIME))
+                        .latitude(50.275238)
+                        .longitude(21.303548)
+                        .build();
 
                 weatherData.add(temp);
 
