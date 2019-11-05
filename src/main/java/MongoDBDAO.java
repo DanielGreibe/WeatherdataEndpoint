@@ -58,16 +58,20 @@ public class MongoDBDAO implements WeatherstationDAO {
     }
 
 
-    public List<WeatherData> getWeatherstationData(String stringDate, String weatherstationName, ContentType contentType) throws WrongDateFormatException {
+    public List<WeatherData> getWeatherstationData(String stringDateStart, String stringDateEnd, String weatherstationName, ContentType contentType) throws WrongDateFormatException {
         // Currently The weatherstation sends a POST message to the url /rest/weatherstation which would result in data being sent to a collection named
         // weatherstation. The current data is saved in the collection Weatherstation1. This is why .getCollection takes the hardcoded string Weatherstation1
         // instead of the weatherstationName field.
         MongoCollection<Document> collection = MongoConnection.getInstance("AgricircleDB").getDatabase().getCollection("Weatherstation1");
 
-        ObjectId date;
-        date = DateToObjectId(stringDate);
+        ObjectId dateStart;
+        ObjectId dateEnd;
+        dateStart = DateToObjectId(stringDateStart);
+        dateEnd = DateToObjectId(stringDateEnd);
 
-        FindIterable<Document> iterable = collection.find(gte("_id", date)).
+        FindIterable<Document> iterable = collection.find(and(
+                        gte("_id", dateStart),
+                        lte("_id", dateEnd))).
                 projection(fields(include(
                         "payload_fields.avg_wind_speed",
                         "payload_fields.solar_radiation",
@@ -90,7 +94,7 @@ public class MongoDBDAO implements WeatherstationDAO {
 
     private static String DateToHexString(int year, int month, int day) throws WrongDateFormatException {
         final Calendar calendar = Calendar.getInstance();
-        calendar.set(year, month - 1, day, 0, 0, 0);
+        calendar.set(year, month - 1, day, 1, 0, 0);
 
         calendar.set(Calendar.MILLISECOND, 0);
 

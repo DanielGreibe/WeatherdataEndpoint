@@ -37,6 +37,7 @@ public class WeatherstationEndpoint {
      * @param contentType the type of content the API produces. Can be NETCDF or JSON. Only JSON is possible atm.
      * @return a JSON string with all data in the database.
      */
+    @Produces(MediaType.APPLICATION_JSON)
     @GET
     public String getWeatherstationData(@PathParam("weatherstation") String weatherstationName , @QueryParam("contenttype") ContentType contentType)
     {
@@ -50,19 +51,21 @@ public class WeatherstationEndpoint {
 
     /**
      * Provides all data elements that was posted between the provided date and current day.
-     * @param date A yyyy-mm-dd formatted string.
+     * @param dateStart A yyyy-mm-dd formatted string.
+     * @param dateEnd A yyyy-mm-dd formatted string.
      * @param weatherstationName the name of the weather station to get data from. (Not Yet Implemented!)
      * @param contentType the type of content the API produces. Can be netcdf or json. Only json is possible atm.
      * @return A list of JSON elements that matches the filter criteria provided or 'We couldn't find any data with the given criteria' if no such data exists.
      */
     @GET
-    @Path("{date}")
-    public String getWeatherstationData(@PathParam("date") String date , @PathParam("weatherstation") String weatherstationName , @QueryParam("contenttype") ContentType contentType) throws WrongDateFormatException {
+    @Path("date")
+    @Produces(MediaType.APPLICATION_JSON)
+    public String getWeatherstationData(@QueryParam("dateStart") String dateStart , @QueryParam("dateEnd") String dateEnd, @PathParam("weatherstation") String weatherstationName , @QueryParam("contenttype") ContentType contentType) throws WrongDateFormatException {
         System.out.println(
                 "Kald getWeatherstationData(date,weatherstationName, contentType): " +
-                "\n Date: " + date +
+                "\n Date: " + dateStart +
                 "\n Weatherstation Name: " + weatherstationName +
                 "\n ContentType: " + contentType);
-        return new Gson().toJson(database.getWeatherstationData(date, weatherstationName , contentType));
+        return new Gson().toJson(database.getWeatherstationData(dateStart, dateEnd, weatherstationName , contentType));
     }
 }
