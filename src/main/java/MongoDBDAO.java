@@ -1,152 +1,157 @@
 import com.mongodb.*;
 import com.mongodb.client.*;
+import lombok.extern.slf4j.Slf4j;
 import org.bson.Document;
 import org.bson.types.ObjectId;
-import java.rmi.ServerException;
+import org.jetbrains.annotations.NotNull;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 import static com.mongodb.client.model.Filters.*;
 import static com.mongodb.client.model.Projections.*;
 
+@Slf4j
 public class MongoDBDAO implements WeatherstationDAO {
 
 
+    private static final String PAYLOAD_FIELDS = "payload_fields";
+    private static final String AVG_WIND_SPEED = "avg_wind_speed";
+    private static final String BAROMETER_DATA = "barometer_data";
+    private static final String OUTSIDE_HUMIDITY = "outside_humidity";
+    private static final String OUTSIDE_TEMPERATURE = "outside_temperature";
+    private static final String RAIN_RATE = "rain_rate";
+    private static final String SOLAR_RADIATION = "solar_radiation";
+    public static final String STATION_ID = "dev_id";
+    public static final String TIME = "time";
 
     @Override
-    public String setWeatherstationData(String jsonMessage, String weatherstationName) throws ServerException {
-        //For Production:
-        //MongoCollection<Document> collection = MongoConnection.getInstance("AgricircleDB").getDatabase().getCollection(weatherstationName);
-
-        //For Development:
+    public void setWeatherstationData(String jsonMessage, String weatherstationName) throws ServerException {
         MongoCollection<Document> collection = MongoConnection.getInstance("AgricircleDB").getDatabase().getCollection("Weatherstation1");
         try {
             collection.insertOne(Document.parse(jsonMessage));
-            return "Database updated";
         } catch (MongoWriteException | MongoWriteConcernException e) {
             throw new ServerException(e.getMessage());
         }
     }
 
     @Override
-    public String getWeatherstationData(String weatherstationName , String contentType)
-    {
-        //For Production:
-        //MongoCollection<Document> collection = MongoConnection.getInstance("AgricircleDB").getDatabase().getCollection(weatherstationName);
-
-        //For Development:
+    public List<WeatherData> getWeatherstationData(String weatherstationName, ContentType contentType) {
         MongoCollection<Document> collection = MongoConnection.getInstance("AgricircleDB").getDatabase().getCollection("Weatherstation1");
-        StringBuilder returnString = new StringBuilder();
         FindIterable<Document> iterable = collection.find().projection(fields(include(
                 "payload_fields.avg_wind_speed",
                 "payload_fields.solar_radiation",
                 "payload_fields.outside_temperature",
                 "payload_fields.outside_humidity",
                 "payload_fields.barometer_data",
-                "payload_fields.rain_rate"),
+                "payload_fields.rain_rate",
+                "dev_id",
+                "metadata.time"),
                 excludeId()));
-        if(contentType != null && contentType.equals("netcdf"))
-        {
+
+        if (contentType == ContentType.NETCDF) {
             //TODO Convert JSON to netcdf and return it.
-            return "Not Yet Implemented. Use contenttype = json";
+            throw new UnsupportedOperationException();
+        } else {
+            return DocumentToWeatherData(iterable);
         }
-        else {
-            if (iterable != null) {
-                returnString.append("[");
-                for (Document document : iterable) {
-                    returnString.append(document.toJson()).append(",");
-                }
-                returnString.delete(returnString.length() - 1, returnString.length());
-                returnString.append("]");
-            }
-        }
-        return returnString.toString();
     }
 
 
-
-    public String getWeatherstationData(String stringDate , String weatherstationName , String contentType){
-        //For Production:
-        //MongoCollection<Document> collection = MongoConnection.getInstance("AgricircleDB").getDatabase().getCollection(weatherstationName);
-
-        //For Development:
+    public List<WeatherData> getWeatherstationData(String stringDateStart, String stringDateEnd, String weatherstationName, ContentType contentType) throws WrongDateFormatException {
+        // Currently The weatherstation sends a POST message to the url /rest/weatherstation which would result in data being sent to a collection named
+        // weatherstation. The current data is saved in the collection Weatherstation1. This is why .getCollection takes the hardcoded string Weatherstation1
+        // instead of the weatherstationName field.
         MongoCollection<Document> collection = MongoConnection.getInstance("AgricircleDB").getDatabase().getCollection("Weatherstation1");
 
-        StringBuilder returnString = new StringBuilder();
-        ObjectId date;
-        try{
-             date = DateToObjectId(stringDate);
-        }
-        catch(WrongDateFormatException wdfe)
-        {
-            return wdfe.getMessage();
-        }
+        ObjectId dateStart;
+        ObjectId dateEnd;
+        dateStart = DateToObjectId(stringDateStart);
+        dateEnd = DateToObjectId(stringDateEnd);
 
-        FindIterable<Document> iterable = collection.find(gte("_id" , date)).
+        FindIterable<Document> iterable = collection.find(and(
+                        gte("_id", dateStart),
+                        lte("_id", dateEnd))).
                 projection(fields(include(
                         "payload_fields.avg_wind_speed",
                         "payload_fields.solar_radiation",
                         "payload_fields.outside_temperature",
                         "payload_fields.outside_humidity",
                         "payload_fields.barometer_data",
-                        "payload_fields.rain_rate"),
+                        "payload_fields.rain_rate",
+                        "dev_id",
+                        "metadata.time"
+                        ),
                         excludeId()));
 
-        if(contentType!= null && contentType.equals("netcdf"))
-        {
+        if (contentType == ContentType.NETCDF) {
             //TODO Convert JSON to netcdf and return it.
-            return "Not Yet Implemented. Use contenttype = json";
+            throw new UnsupportedOperationException();
+        } else {
+            return DocumentToWeatherData(iterable);
         }
-        else
-        {
-            if (iterable != null) {
-                returnString.append("{\"dataobjects\":[");
-                for (Document document : iterable) {
-                    returnString.append(document.toJson()).append(",");
-                }
-                returnString.delete(returnString.length() - 1, returnString.length());
-                returnString.append("]}");
-            }
-        }
-        return returnString.toString();
     }
 
     private static String DateToHexString(int year, int month, int day) throws WrongDateFormatException {
         final Calendar calendar = Calendar.getInstance();
-        calendar.set(year, month-1, day , 0 , 0 , 0);
+        calendar.set(year, month - 1, day, 1, 0, 0);
 
         calendar.set(Calendar.MILLISECOND, 0);
 
-        if(calendar.getTime().after(new Date()))
-        {
-            throw new WrongDateFormatException("Date should be earlier than current date");
+        if (calendar.getTime().after(new Date())) {
+            throw new WrongDateFormatException("Provided date should be earlier than current date");
         }
         long time = (calendar.getTimeInMillis() / 1000);
         return Long.toHexString(time) + "0000000000000000";
     }
 
     private static ObjectId DateToObjectId(String stringDate) throws WrongDateFormatException {
-        if(stringDate == null)
-        {
+        if (stringDate == null) {
             throw new WrongDateFormatException("Please provide a date");
         }
         String[] splittedDate = stringDate.split("-");
-        if(splittedDate.length != 3 || splittedDate[0].length() > 4 || splittedDate[1].length() > 2 || splittedDate[2].length() > 2)
-        {
+        if (splittedDate.length != 3 || splittedDate[0].length() > 4 || splittedDate[1].length() > 2 || splittedDate[2].length() > 2) {
             throw new WrongDateFormatException("Date format should be yyyy-mm-dd");
         }
 
         int Year = Integer.parseInt(splittedDate[0]);
         int Month = Integer.parseInt(splittedDate[1]);
         int Day = Integer.parseInt(splittedDate[2]);
-        String hexString = DateToHexString(Year , Month , Day);
+        String hexString = DateToHexString(Year, Month, Day);
         return new ObjectId(hexString);
     }
 
-    public static class WrongDateFormatException extends Exception
-    {
-        WrongDateFormatException(String message)
-        {
-            super(message);
+    @NotNull
+    private List<WeatherData> DocumentToWeatherData(FindIterable<Document> iterable) {
+        List<Document> into = iterable.into(new ArrayList<>());
+        List<WeatherData> weatherData = new ArrayList<>();
+        for (Document doc : into) {
+            Document document = doc.get(PAYLOAD_FIELDS, Document.class);
+            Document document2 = doc.get("metadata", Document.class);
+
+
+            if (document == null || document2 == null) {
+                log.error("Document is null, skipped document");
+                log.error(doc.toString());
+
+            } else {
+                WeatherData temp = WeatherData.builder()
+                        .average_wind_speed(new Double(document.get(AVG_WIND_SPEED) + ""))
+                        .outside_temperature(new Double(document.get(OUTSIDE_TEMPERATURE) + ""))
+                        .barometer_data(new Double(document.get(BAROMETER_DATA) + ""))
+                        .outside_humidity(document.getInteger(OUTSIDE_HUMIDITY))
+                        .rain_rate(document.getInteger(RAIN_RATE))
+                        .solar_radiation(document.getInteger(SOLAR_RADIATION))
+                        .station_id(doc.getString(STATION_ID))
+                        .time(document2.getString(TIME))
+                        .latitude(50.275238)
+                        .longitude(21.303548)
+                        .build();
+
+                weatherData.add(temp);
+
+            }
         }
+        return weatherData;
     }
 }
