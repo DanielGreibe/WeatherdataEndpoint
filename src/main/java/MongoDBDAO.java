@@ -1,13 +1,14 @@
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.mongodb.*;
 import com.mongodb.client.*;
+import com.mongodb.client.model.Filters;
 import lombok.extern.slf4j.Slf4j;
 import org.bson.Document;
 import org.bson.types.ObjectId;
 import org.jetbrains.annotations.NotNull;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
+
+import java.util.*;
+
 import static com.mongodb.client.model.Filters.*;
 import static com.mongodb.client.model.Projections.*;
 
@@ -49,7 +50,7 @@ public class MongoDBDAO implements WeatherstationDAO {
                 "metadata.time"),
                 excludeId()));
 
-        if (contentType == ContentType.NETCDF) {
+        if (contentType == contentType.NETCDF) {
             //TODO Convert JSON to netcdf and return it.
             throw new UnsupportedOperationException();
         } else {
@@ -153,5 +154,74 @@ public class MongoDBDAO implements WeatherstationDAO {
             }
         }
         return weatherData;
+    }
+
+    public Location getLocation(String station_id, String time) {
+        MongoCollection<Document> collection = MongoConnection.getInstance("AgricircleDB").getDatabase().getCollection("Locations");
+        FindIterable<Document> iterable =collection.find(Filters.eq("station_id", station_id));
+        List<Document> payload = iterable.into(new ArrayList<>());
+        Location location = new Location();
+
+        for (Document document : payload)
+        {
+            String[] start_time = document.getString("start_time").split("[-:T]");
+            String[] end_time = document.getString("end_time").split("[-:T]");
+            String[] time_array = time.split("[-:T]");
+
+            Calendar start_time_calendar = Calendar.getInstance();
+            start_time_calendar.set(Calendar.YEAR, Integer.parseInt(start_time[0]));
+            start_time_calendar.set(Calendar.MONTH, Integer.parseInt(start_time[1])-1);
+            start_time_calendar.set(Calendar.DATE, Integer.parseInt(start_time[2]));
+            start_time_calendar.set(Calendar.HOUR, Integer.parseInt(start_time[3])-12);
+            start_time_calendar.set(Calendar.MINUTE, Integer.parseInt(start_time[4]));
+            start_time_calendar.set(Calendar.SECOND, Integer.parseInt(start_time[5]));
+            Date start_time_date = start_time_calendar.getTime();
+
+            System.out.println("Printing start_time_date");
+            System.out.println(document.getString("start_time"));
+            System.out.println(start_time_date);
+
+            Calendar end_time_calendar = Calendar.getInstance();
+            end_time_calendar.set(Calendar.YEAR, Integer.parseInt(end_time[0]));
+            end_time_calendar.set(Calendar.MONTH, Integer.parseInt(end_time[1])-1);
+            end_time_calendar.set(Calendar.DATE, Integer.parseInt(end_time[2]));
+            end_time_calendar.set(Calendar.HOUR, Integer.parseInt(end_time[3])-12);
+            end_time_calendar.set(Calendar.MINUTE, Integer.parseInt(end_time[4]));
+            end_time_calendar.set(Calendar.SECOND, Integer.parseInt(end_time[5]));
+            Date end_time_date = end_time_calendar.getTime();
+
+            System.out.println("Printing end_time_date");
+            System.out.println(document.getString("end_time"));
+            System.out.println(end_time_date);
+
+
+            Calendar time_calendar = Calendar.getInstance();
+            time_calendar.set(Calendar.YEAR, Integer.parseInt(time_array[0]));
+            time_calendar.set(Calendar.MONTH, Integer.parseInt(time_array[1])-1);
+            time_calendar.set(Calendar.DATE, Integer.parseInt(time_array[2]));
+            time_calendar.set(Calendar.HOUR, Integer.parseInt(time_array[3])-12);
+            time_calendar.set(Calendar.MINUTE, Integer.parseInt(time_array[4]));
+            time_calendar.set(Calendar.SECOND, Integer.parseInt(time_array[5]));
+            Date time_date = time_calendar.getTime();
+
+            System.out.println("Printing time_date");
+            System.out.println(time);
+            System.out.println(time_date);
+
+
+            if(time_date.before(end_time_date) && time_date.after(start_time_date))
+            {
+                location = Location.builder()
+                        .latitude(document.getDouble("latitude"))
+                        .longitude(document.getDouble("longitude"))
+                        .station_id(document.getString("station_id"))
+                        .start_time(document.getString("start_time"))
+                        .end_time(document.getString("end_time"))
+                        .build();
+                return location;
+            }
+
+        }
+        return location;
     }
 }
