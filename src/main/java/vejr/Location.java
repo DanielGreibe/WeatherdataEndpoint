@@ -1,3 +1,5 @@
+package vejr;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -9,9 +11,9 @@ import lombok.NoArgsConstructor;
 @Builder
 public class Location
 {
-    double latitude;
-    double longitude;
-    String station_id;
-    String start_time;
-    String end_time;
+    public double latitude;
+    public double longitude;
+    public String station_id;
+    public String start_time;
+    public String end_time;
 }

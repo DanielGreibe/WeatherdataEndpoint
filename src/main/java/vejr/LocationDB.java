@@ -1,3 +1,5 @@
+package vejr;
+
 import com.mongodb.MongoWriteConcernException;
 import com.mongodb.MongoWriteException;
 import com.mongodb.client.FindIterable;

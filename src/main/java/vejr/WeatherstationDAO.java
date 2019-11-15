@@ -1,3 +1,5 @@
+package vejr;
+
 import java.util.List;
 
 public interface WeatherstationDAO

@@ -1,4 +1,6 @@
 import com.google.gson.Gson;
+import vejr.*;
+
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 

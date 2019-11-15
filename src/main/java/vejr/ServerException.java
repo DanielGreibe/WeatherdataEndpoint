@@ -1,7 +1,9 @@
+package vejr;
+
 import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.ExceptionMapper;
 
-class ServerException extends Exception implements
+public class ServerException extends Exception implements
         ExceptionMapper<ServerException>
 {
     public ServerException()

@@ -1,6 +1,10 @@
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import vejr.Location;
+import vejr.LocationDAO;
+import vejr.LocationDB;
+import vejr.ServerException;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
