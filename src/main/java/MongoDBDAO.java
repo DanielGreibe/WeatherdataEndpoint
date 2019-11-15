@@ -216,21 +216,7 @@ public class MongoDBDAO implements WeatherstationDAO {
     {
         MongoCollection<Document> collection = MongoConnection.getInstance("AgricircleDB").getDatabase().getCollection("Locations");
         FindIterable<Document> iterable = collection.find();
-        List<Document> payload = iterable.into(new ArrayList<>());
-        List<Location> locationList = new ArrayList<>();
-
-        for (Document document : payload)
-        {
-            Location location = Location.builder()
-                    .latitude(document.getDouble("latitude"))
-                    .longitude(document.getDouble("longitude"))
-                    .station_id(document.getString("station_id"))
-                    .start_time(document.getString("start_time"))
-                    .end_time(document.getString("end_time"))
-                    .build();
-            locationList.add(location);
-        }
-        return locationList;
+        return LocationDB.DocumentToLocationList(iterable);
 
     }
 }

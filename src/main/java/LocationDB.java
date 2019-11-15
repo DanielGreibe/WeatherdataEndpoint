@@ -31,8 +31,7 @@ public class LocationDB implements LocationDAO
         return DocumentToLocationList(iterable);
     }
 
-    private List<Location> DocumentToLocationList(FindIterable<Document> iterable)
-    {
+    public static List<Location> DocumentToLocationList(FindIterable<Document> iterable) {
         List<Document> payload = iterable.into(new ArrayList<>());
         List<Location> locationList = new ArrayList<>();
 
