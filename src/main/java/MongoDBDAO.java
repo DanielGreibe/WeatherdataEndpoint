@@ -163,37 +163,10 @@ public class MongoDBDAO implements WeatherstationDAO {
 
         for (Location location : LocationList)
         {
-            String[] start_time = location.start_time.split("[-:T.]");
-            String[] end_time = location.end_time.split("[-:T.]");
-            String[] time_array = time.split("[-:T.]");
 
-            Calendar start_time_calendar = Calendar.getInstance();
-            start_time_calendar.set(Calendar.YEAR, Integer.parseInt(start_time[0]));
-            start_time_calendar.set(Calendar.MONTH, Integer.parseInt(start_time[1])-1);
-            start_time_calendar.set(Calendar.DATE, Integer.parseInt(start_time[2]));
-            start_time_calendar.set(Calendar.HOUR, Integer.parseInt(start_time[3])-12);
-            start_time_calendar.set(Calendar.MINUTE, Integer.parseInt(start_time[4]));
-            start_time_calendar.set(Calendar.SECOND, Integer.parseInt(start_time[5]));
-            Date start_time_date = start_time_calendar.getTime();
-
-            Calendar end_time_calendar = Calendar.getInstance();
-            end_time_calendar.set(Calendar.YEAR, Integer.parseInt(end_time[0]));
-            end_time_calendar.set(Calendar.MONTH, Integer.parseInt(end_time[1])-1);
-            end_time_calendar.set(Calendar.DATE, Integer.parseInt(end_time[2]));
-            end_time_calendar.set(Calendar.HOUR, Integer.parseInt(end_time[3])-12);
-            end_time_calendar.set(Calendar.MINUTE, Integer.parseInt(end_time[4]));
-            end_time_calendar.set(Calendar.SECOND, Integer.parseInt(end_time[5]));
-            Date end_time_date = end_time_calendar.getTime();
-
-
-            Calendar time_calendar = Calendar.getInstance();
-            time_calendar.set(Calendar.YEAR, Integer.parseInt(time_array[0]));
-            time_calendar.set(Calendar.MONTH, Integer.parseInt(time_array[1])-1);
-            time_calendar.set(Calendar.DATE, Integer.parseInt(time_array[2]));
-            time_calendar.set(Calendar.HOUR, Integer.parseInt(time_array[3])-12);
-            time_calendar.set(Calendar.MINUTE, Integer.parseInt(time_array[4]));
-            time_calendar.set(Calendar.SECOND, Integer.parseInt(time_array[5]));
-            Date time_date = time_calendar.getTime();
+            Date start_time_date = timeStrToDate(location.start_time);
+            Date end_time_date = timeStrToDate(location.end_time);
+            Date time_date = timeStrToDate(time);
 
             if(time_date.before(end_time_date) && time_date.after(start_time_date))
             {
@@ -210,6 +183,19 @@ public class MongoDBDAO implements WeatherstationDAO {
 
         }
         return newLocation;
+    }
+
+    @NotNull
+    public static Date timeStrToDate(String timeStr) {
+        Calendar start_time_calendar = Calendar.getInstance();
+        String[] start_time = timeStr.split("[-:T.]");
+        start_time_calendar.set(Calendar.YEAR, Integer.parseInt(start_time[0]));
+        start_time_calendar.set(Calendar.MONTH, Integer.parseInt(start_time[1]) - 1);
+        start_time_calendar.set(Calendar.DATE, Integer.parseInt(start_time[2]));
+        start_time_calendar.set(Calendar.HOUR, Integer.parseInt(start_time[3]) - 12);
+        start_time_calendar.set(Calendar.MINUTE, Integer.parseInt(start_time[4]));
+        start_time_calendar.set(Calendar.SECOND, Integer.parseInt(start_time[5]));
+        return start_time_calendar.getTime();
     }
 
     private List<Location> getDeviceLocations()
