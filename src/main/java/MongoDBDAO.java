@@ -126,27 +126,29 @@ public class MongoDBDAO implements WeatherstationDAO {
     private List<WeatherData> DocumentToWeatherData(FindIterable<Document> iterable) {
         List<Document> into = iterable.into(new ArrayList<>());
         List<WeatherData> weatherData = new ArrayList<>();
+        List<Location> LocationList = getDeviceLocations();
         for (Document doc : into) {
-            Document document = doc.get(PAYLOAD_FIELDS, Document.class);
-            Document document2 = doc.get("metadata", Document.class);
+            Document payload_fields = doc.get(PAYLOAD_FIELDS, Document.class);
+            Document metadata = doc.get("metadata", Document.class);
+            Location location = getLocation(doc.getString(STATION_ID) , metadata.getString(TIME), LocationList);
 
 
-            if (document == null || document2 == null) {
-                log.error("Document is null, skipped document");
+            if (payload_fields == null || metadata == null) {
+                log.error("Document is null, skipped payload_fields");
                 log.error(doc.toString());
 
             } else {
                 WeatherData temp = WeatherData.builder()
-                        .average_wind_speed(new Double(document.get(AVG_WIND_SPEED) + ""))
-                        .outside_temperature(new Double(document.get(OUTSIDE_TEMPERATURE) + ""))
-                        .barometer_data(new Double(document.get(BAROMETER_DATA) + ""))
-                        .outside_humidity(document.getInteger(OUTSIDE_HUMIDITY))
-                        .rain_rate(document.getInteger(RAIN_RATE))
-                        .solar_radiation(document.getInteger(SOLAR_RADIATION))
+                        .average_wind_speed(new Double(payload_fields.get(AVG_WIND_SPEED) + ""))
+                        .outside_temperature(new Double(payload_fields.get(OUTSIDE_TEMPERATURE) + ""))
+                        .barometer_data(new Double(payload_fields.get(BAROMETER_DATA) + ""))
+                        .outside_humidity(payload_fields.getInteger(OUTSIDE_HUMIDITY))
+                        .rain_rate(payload_fields.getInteger(RAIN_RATE))
+                        .solar_radiation(payload_fields.getInteger(SOLAR_RADIATION))
                         .station_id(doc.getString(STATION_ID))
-                        .time(document2.getString(TIME))
-                        .latitude(50.275238)
-                        .longitude(21.303548)
+                        .time(metadata.getString(TIME))
+                        .latitude(location.latitude)
+                        .longitude(location.longitude)
                         .build();
 
                 weatherData.add(temp);
@@ -156,17 +158,14 @@ public class MongoDBDAO implements WeatherstationDAO {
         return weatherData;
     }
 
-    public Location getLocation(String station_id, String time) {
-        MongoCollection<Document> collection = MongoConnection.getInstance("AgricircleDB").getDatabase().getCollection("Locations");
-        FindIterable<Document> iterable =collection.find(Filters.eq("station_id", station_id));
-        List<Document> payload = iterable.into(new ArrayList<>());
-        Location location = new Location();
+    public Location getLocation(String station_id, String time, List<Location> LocationList) {
+        Location newLocation = new Location();
 
-        for (Document document : payload)
+        for (Location location : LocationList)
         {
-            String[] start_time = document.getString("start_time").split("[-:T]");
-            String[] end_time = document.getString("end_time").split("[-:T]");
-            String[] time_array = time.split("[-:T]");
+            String[] start_time = location.start_time.split("[-:T.]");
+            String[] end_time = location.end_time.split("[-:T.]");
+            String[] time_array = time.split("[-:T.]");
 
             Calendar start_time_calendar = Calendar.getInstance();
             start_time_calendar.set(Calendar.YEAR, Integer.parseInt(start_time[0]));
@@ -177,10 +176,6 @@ public class MongoDBDAO implements WeatherstationDAO {
             start_time_calendar.set(Calendar.SECOND, Integer.parseInt(start_time[5]));
             Date start_time_date = start_time_calendar.getTime();
 
-            System.out.println("Printing start_time_date");
-            System.out.println(document.getString("start_time"));
-            System.out.println(start_time_date);
-
             Calendar end_time_calendar = Calendar.getInstance();
             end_time_calendar.set(Calendar.YEAR, Integer.parseInt(end_time[0]));
             end_time_calendar.set(Calendar.MONTH, Integer.parseInt(end_time[1])-1);
@@ -189,10 +184,6 @@ public class MongoDBDAO implements WeatherstationDAO {
             end_time_calendar.set(Calendar.MINUTE, Integer.parseInt(end_time[4]));
             end_time_calendar.set(Calendar.SECOND, Integer.parseInt(end_time[5]));
             Date end_time_date = end_time_calendar.getTime();
-
-            System.out.println("Printing end_time_date");
-            System.out.println(document.getString("end_time"));
-            System.out.println(end_time_date);
 
 
             Calendar time_calendar = Calendar.getInstance();
@@ -204,24 +195,42 @@ public class MongoDBDAO implements WeatherstationDAO {
             time_calendar.set(Calendar.SECOND, Integer.parseInt(time_array[5]));
             Date time_date = time_calendar.getTime();
 
-            System.out.println("Printing time_date");
-            System.out.println(time);
-            System.out.println(time_date);
-
-
             if(time_date.before(end_time_date) && time_date.after(start_time_date))
             {
-                location = Location.builder()
-                        .latitude(document.getDouble("latitude"))
-                        .longitude(document.getDouble("longitude"))
-                        .station_id(document.getString("station_id"))
-                        .start_time(document.getString("start_time"))
-                        .end_time(document.getString("end_time"))
+                newLocation = Location.builder()
+                        .latitude(location.latitude)
+                        .longitude(location.longitude)
+                        .station_id(location.station_id)
+                        .start_time(location.start_time)
+                        .end_time(location.end_time)
                         .build();
-                return location;
+
+                return newLocation;
             }
 
         }
-        return location;
+        return newLocation;
+    }
+
+    private List<Location> getDeviceLocations()
+    {
+        MongoCollection<Document> collection = MongoConnection.getInstance("AgricircleDB").getDatabase().getCollection("Locations");
+        FindIterable<Document> iterable = collection.find();
+        List<Document> payload = iterable.into(new ArrayList<>());
+        List<Location> locationList = new ArrayList<>();
+
+        for (Document document : payload)
+        {
+            Location location = Location.builder()
+                    .latitude(document.getDouble("latitude"))
+                    .longitude(document.getDouble("longitude"))
+                    .station_id(document.getString("station_id"))
+                    .start_time(document.getString("start_time"))
+                    .end_time(document.getString("end_time"))
+                    .build();
+            locationList.add(location);
+        }
+        return locationList;
+
     }
 }
