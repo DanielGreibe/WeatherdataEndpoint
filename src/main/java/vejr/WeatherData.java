@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Data
 @Builder
-public class WeatherData {
+class WeatherData {
 
     private double latitude;
     private double longitude;

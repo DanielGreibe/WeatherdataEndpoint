@@ -37,7 +37,7 @@ public class MongoDBDAO implements WeatherstationDAO {
     }
 
     @Override
-    public List<WeatherData> getWeatherstationData(String weatherstationName, ContentType contentType) {
+    public List<WeatherData> getWeatherstationData(String weatherstationName) {
         MongoCollection<Document> collection = MongoConnection.getInstance("AgricircleDB").getDatabase().getCollection("Weatherstation1");
         FindIterable<Document> iterable = collection.find().projection(fields(include(
                 "payload_fields.avg_wind_speed",
@@ -50,16 +50,11 @@ public class MongoDBDAO implements WeatherstationDAO {
                 "metadata.time"),
                 excludeId()));
 
-        if (contentType == contentType.NETCDF) {
-            //TODO Convert JSON to netcdf and return it.
-            throw new UnsupportedOperationException();
-        } else {
             return DocumentToWeatherData(iterable);
-        }
     }
 
 
-    public List<WeatherData> getWeatherstationData(String stringDateStart, String stringDateEnd, String weatherstationName, ContentType contentType) throws WrongDateFormatException {
+    public List<WeatherData> getWeatherstationData(String stringDateStart, String stringDateEnd, String weatherstationName) throws WrongDateFormatException {
         // Currently The weatherstation sends a POST message to the url /rest/weatherstation which would result in data being sent to a collection named
         // weatherstation. The current data is saved in the collection Weatherstation1. This is why .getCollection takes the hardcoded string Weatherstation1
         // instead of the weatherstationName field.
@@ -85,12 +80,7 @@ public class MongoDBDAO implements WeatherstationDAO {
                         ),
                         excludeId()));
 
-        if (contentType == ContentType.NETCDF) {
-            //TODO Convert JSON to netcdf and return it.
-            throw new UnsupportedOperationException();
-        } else {
             return DocumentToWeatherData(iterable);
-        }
     }
 
     private static String DateToHexString(int year, int month, int day) throws WrongDateFormatException {
